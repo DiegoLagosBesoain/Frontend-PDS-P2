@@ -1,7 +1,7 @@
 import React from "react";
 import { auth, provider, signInWithPopup } from "../firebase";
 import axios from "axios";
-const API_URL = import.meta.env.API_URL;
+const API_URL = import.meta.env.VITE_API_URL || "";
 function Login({ onLogin }) {
   const handleGoogleLogin = async () => {
   try {
@@ -10,7 +10,7 @@ function Login({ onLogin }) {
     const user = result.user;
 
     // Mandar usuario al backend para registrar en Postgres
-    const res = await axios.post(`https://backend-pds-p2.onrender.com/api/users`, {
+    const res = await axios.post(`${API_URL}/users`, {
       email: user.email,
       username: user.displayName,
       uid: user.uid, // 🔹 UID único de Firebase

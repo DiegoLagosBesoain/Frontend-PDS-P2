@@ -6,7 +6,7 @@ import CreateElementModal from "../forms/CreateElementModal.jsx";
 function Projects({ user }) {
   const [projects, setProjects] = useState([]);
   const [modalInfo, setModalInfo] = useState({ show: false, project: null, element: null });
-  const API_URL = import.meta.env.API_URL;
+  const API_URL = import.meta.env.VITE_API_URL || "";
 
   // Trae proyectos y sus elementos
   useEffect(() => {
@@ -22,7 +22,7 @@ function Projects({ user }) {
 
         const elementsPromises = projs.map((p) =>
           axios
-            .get(`https://backend-pds-p2.onrender.com/processes/${p.id}/elements`)
+            .get(`${API_URL}/processes/${p.id}/elements`)
             .then((r) => r.data)
             .catch(() => [])
         );
