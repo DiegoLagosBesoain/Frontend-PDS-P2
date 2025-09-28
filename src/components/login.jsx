@@ -10,7 +10,7 @@ function Login({ onLogin }) {
     const user = result.user;
 
     // Mandar usuario al backend para registrar en Postgres
-    const res = await axios.post(`${API_URL}/users`, {
+    const res = await axios.post(`https://frontend-pds-p2.onrender.com/api/users`, {
       email: user.email,
       username: user.displayName,
       uid: user.uid, // 🔹 UID único de Firebase
