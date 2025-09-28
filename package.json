@@ -16,7 +16,10 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.0",
-    "reactflow": "^11.11.4"
+    "reactflow": "^11.11.4",
+    "pg": "^8.16.3",
+    "recharts": "^3.2.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
