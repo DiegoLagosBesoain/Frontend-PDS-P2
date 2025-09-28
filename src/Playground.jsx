@@ -16,6 +16,7 @@ import SelectorForm from "./forms/SelectorForm";
 import { useParams,useNavigate } from "react-router-dom";
 import { validateProcessDef } from "./simulation_rules";
 
+
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -29,7 +30,7 @@ import {
 
 import "@xyflow/react/dist/style.css";
 
-const API_URL = "http://localhost:4000/api";
+const API_URL = import.meta.env.API_URL;
 
 
 

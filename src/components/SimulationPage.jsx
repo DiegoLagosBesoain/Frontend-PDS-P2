@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import * as XLSX from "xlsx";
 
-const API_URL = "http://localhost:4000/api";
+const API_URL = import.meta.env.API_URL;
 
 function shortId(id = "") {
   return String(id).slice(0, 8);

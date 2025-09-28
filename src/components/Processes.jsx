@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link,useNavigate } from "react-router-dom";
 import axios from "axios";
-const API_URL = "http://localhost:4000/api";
+const API_URL = import.meta.env.API_URL;
 function Processes({ user }) {
   const navigate=useNavigate()
   const { projectId } = useParams();

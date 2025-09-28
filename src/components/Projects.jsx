@@ -6,7 +6,7 @@ import CreateElementModal from "../forms/CreateElementModal.jsx";
 function Projects({ user }) {
   const [projects, setProjects] = useState([]);
   const [modalInfo, setModalInfo] = useState({ show: false, project: null, element: null });
-  const API_URL = "http://localhost:4000/api";
+  const API_URL = import.meta.env.API_URL;
 
   // Trae proyectos y sus elementos
   useEffect(() => {
