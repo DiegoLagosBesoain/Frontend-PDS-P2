@@ -22,7 +22,7 @@ function Projects({ user }) {
 
         const elementsPromises = projs.map((p) =>
           axios
-            .get(`${API_URL}/processes/${p.id}/elements`)
+            .get(`https://backend-pds-p2.onrender.com/processes/${p.id}/elements`)
             .then((r) => r.data)
             .catch(() => [])
         );
