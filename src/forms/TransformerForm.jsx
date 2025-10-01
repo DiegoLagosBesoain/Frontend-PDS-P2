@@ -1,5 +1,125 @@
 import React, { useState, useEffect } from "react";
 
+// Mover DistributionEditor fuera del componente para evitar re-creaciones
+const DistributionEditor = ({ value, onChange }) => {
+  const DIST_TYPES = ["Exponencial", "Uniforme", "Normal", "Fija"];
+  
+  const makeDefaultForType = (type) => {
+    if (type === "Exponencial") return { type, params: { lambda: 1 } };
+    if (type === "Uniforme") return { type, params: { min: 0, max: 1 } };
+    if (type === "Normal") return { type, params: { mu: 0, sigma: 1 } };
+    return { type: "Fija", params: { value: "" } };
+  };
+
+  const { type: dType = "Fija", params: dParams = {} } = value || {};
+  const setType = (t) => onChange(makeDefaultForType(t));
+  const setParam = (key, v) => onChange({ ...value, params: { ...dParams, [key]: v } });
+
+  return (
+    <div style={{ padding: 8, border: "1px dashed #ddd", marginTop: 6 }}>
+      <label>
+        Tipo de distribución:
+        <select value={dType} onChange={(e) => setType(e.target.value)} style={{ marginLeft: 8 }}>
+          {DIST_TYPES.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      {dType === "Exponencial" && (
+        <div style={{ marginTop: 8 }}>
+          <label>
+            λ:
+            <input 
+              type="number" 
+              value={dParams.lambda ?? ""} 
+              onChange={(e) => {
+                const val = e.target.value;
+                setParam("lambda", val === "" ? "" : parseFloat(val));
+              }} 
+              style={{ marginLeft: 8 }} 
+            />
+          </label>
+        </div>
+      )}
+
+      {dType === "Uniforme" && (
+        <div style={{ marginTop: 8 }}>
+          <label>
+            Mín:
+            <input 
+              type="number" 
+              value={dParams.min ?? ""} 
+              onChange={(e) => {
+                const val = e.target.value;
+                setParam("min", val === "" ? "" : parseFloat(val));
+              }} 
+              style={{ marginLeft: 8, marginRight: 12 }} 
+            />
+          </label>
+          <label>
+            Máx:
+            <input 
+              type="number" 
+              value={dParams.max ?? ""} 
+              onChange={(e) => {
+                const val = e.target.value;
+                setParam("max", val === "" ? "" : parseFloat(val));
+              }} 
+              style={{ marginLeft: 8 }} 
+            />
+          </label>
+        </div>
+      )}
+
+      {dType === "Normal" && (
+        <div style={{ marginTop: 8 }}>
+          <label>
+            μ:
+            <input 
+              type="number" 
+              value={dParams.mu ?? ""} 
+              onChange={(e) => {
+                const val = e.target.value;
+                setParam("mu", val === "" ? "" : parseFloat(val));
+              }} 
+              style={{ marginLeft: 8, marginRight: 12 }} 
+            />
+          </label>
+          <label>
+            σ:
+            <input 
+              type="number" 
+              value={dParams.sigma ?? ""} 
+              onChange={(e) => {
+                const val = e.target.value;
+                setParam("sigma", val === "" ? "" : parseFloat(val));
+              }} 
+              style={{ marginLeft: 8 }} 
+            />
+          </label>
+        </div>
+      )}
+
+      {dType === "Fija" && (
+        <div style={{ marginTop: 8 }}>
+          <label>
+            Valor:
+            <input 
+              type="text" 
+              value={dParams.value ?? ""} 
+              onChange={(e) => setParam("value", e.target.value)} 
+              style={{ marginLeft: 8 }} 
+            />
+          </label>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function TransformerForm({ node, setEditingNode, elements = [] }) {
   const data = node.data || {};
   const {
@@ -282,72 +402,6 @@ const addCondition = () => {
   // ---------- Helpers for element param types ----------
   const getElementDef = (elementType) => elements.find((el) => el.type === elementType) || null;
 
-  // UI helpers for distribution param inputs
-  const DistributionEditor = ({ value, onChange }) => {
-    const { type: dType = "Fija", params: dParams = {} } = value || {};
-    const setType = (t) => onChange(makeDefaultForType(t));
-    const setParam = (key, v) => onChange({ ...value, params: { ...dParams, [key]: v } });
-
-    return (
-      <div style={{ padding: 8, border: "1px dashed #ddd", marginTop: 6 }}>
-        <label>
-          Tipo de distribución:
-          <select value={dType} onChange={(e) => setType(e.target.value)} style={{ marginLeft: 8 }}>
-            {DIST_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        {dType === "Exponencial" && (
-          <div style={{ marginTop: 8 }}>
-            <label>
-              λ:
-              <input type="number" value={dParams.lambda ?? ""} onChange={(e) => setParam("lambda", parseFloat(e.target.value) || "")} style={{ marginLeft: 8 }} />
-            </label>
-          </div>
-        )}
-
-        {dType === "Uniforme" && (
-          <div style={{ marginTop: 8 }}>
-            <label>
-              Mín:
-              <input type="number" value={dParams.min ?? ""} onChange={(e) => setParam("min", parseFloat(e.target.value) || "")} style={{ marginLeft: 8, marginRight: 12 }} />
-            </label>
-            <label>
-              Máx:
-              <input type="number" value={dParams.max ?? ""} onChange={(e) => setParam("max", parseFloat(e.target.value) || "")} style={{ marginLeft: 8 }} />
-            </label>
-          </div>
-        )}
-
-        {dType === "Normal" && (
-          <div style={{ marginTop: 8 }}>
-            <label>
-              μ:
-              <input type="number" value={dParams.mu ?? ""} onChange={(e) => setParam("mu", parseFloat(e.target.value) || "")} style={{ marginLeft: 8, marginRight: 12 }} />
-            </label>
-            <label>
-              σ:
-              <input type="number" value={dParams.sigma ?? ""} onChange={(e) => setParam("sigma", parseFloat(e.target.value) || "")} style={{ marginLeft: 8 }} />
-            </label>
-          </div>
-        )}
-
-        {dType === "Fija" && (
-          <div style={{ marginTop: 8 }}>
-            <label>
-              Valor:
-              <input type="text" value={dParams.value ?? ""} onChange={(e) => setParam("value", e.target.value)} style={{ marginLeft: 8 }} />
-            </label>
-          </div>
-        )}
-      </div>
-    );
-  };
-
   const inputStyle = {
     width: "100%",
     padding: "6px 8px",
@@ -588,13 +642,17 @@ const addCondition = () => {
             </select>
 
             <label style={{ marginTop: 6 }}>
-              Intervalo de muestreo (entero):
+              Intervalo de muestreo:
               <input
                 type="number"
                 min="1"
+                step="any"
                 style={inputStyle}
-                value={s.samplingInterval ?? 1}
-                onChange={(e) => updateSensor(i, "samplingInterval", Math.max(1, parseInt(e.target.value || "1", 10)))}
+                value={s.samplingInterval ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  updateSensor(i, "samplingInterval", val === "" ? "" : parseFloat(val));
+                }}
               />
             </label>
 

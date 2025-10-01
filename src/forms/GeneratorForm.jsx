@@ -132,7 +132,7 @@ export default function GeneratorForm({ node, setEditingNode, elements, onSave }
   const addFailure = () => {
     setParamsState((prev) => ({
       ...prev,
-      failures: [...prev.failures, { dist_activacion: "", dist_duracion: "" }],
+      failures: [...prev.failures, { dist_activacion: { tipo: "", params: {} }, dist_duracion: { tipo: "", params: {} } }],
     }));
   };
   const updateFailure = (index, field, value) => {
@@ -299,10 +299,12 @@ export default function GeneratorForm({ node, setEditingNode, elements, onSave }
         <input
           type="number"
           min="0" // Evita valores negativos desde el input
-          value={s.intervalo || ""}
+          value={s.intervalo ?? ""}
           onChange={(e) => {
-            const val = parseFloat(e.target.value) || 0;
-            updateSensor(idx, "intervalo", val < 0 ? 0 : val);
+            const val = e.target.value;
+            const parsed = val === "" ? "" : parseFloat(val);
+            const safe = parsed === "" ? "" : (parsed < 0 ? 0 : parsed);
+            updateSensor(idx, "intervalo", safe);
           }}
           style={{ marginLeft: "5px", width: "80px" }}
         />
@@ -421,13 +423,14 @@ export default function GeneratorForm({ node, setEditingNode, elements, onSave }
             λ (Lambda):
             <input
               type="number"
-              value={f.dist_activacion.params?.lambda || ""}
-              onChange={(e) =>
+              value={f.dist_activacion.params?.lambda ?? ""}
+              onChange={(e) => {
+                const val = e.target.value;
                 updateFailure(idx, "dist_activacion", {
                   ...f.dist_activacion,
-                  params: { ...f.dist_activacion.params, lambda: parseFloat(e.target.value) || 0 },
-                })
-              }
+                  params: { ...f.dist_activacion.params, lambda: val === "" ? "" : parseFloat(val) },
+                });
+              }}
             />
           </label>
         </div>
@@ -438,26 +441,28 @@ export default function GeneratorForm({ node, setEditingNode, elements, onSave }
             μ (Mu):
             <input
               type="number"
-              value={f.dist_activacion.params?.mu || ""}
-              onChange={(e) =>
+              value={f.dist_activacion.params?.mu ?? ""}
+              onChange={(e) => {
+                const val = e.target.value;
                 updateFailure(idx, "dist_activacion", {
                   ...f.dist_activacion,
-                  params: { ...f.dist_activacion.params, mu: parseFloat(e.target.value) || 0 },
-                })
-              }
+                  params: { ...f.dist_activacion.params, mu: val === "" ? "" : parseFloat(val) },
+                });
+              }}
             />
           </label>
           <label>
             σ (Sigma):
             <input
               type="number"
-              value={f.dist_activacion.params?.sigma || ""}
-              onChange={(e) =>
+              value={f.dist_activacion.params?.sigma ?? ""}
+              onChange={(e) => {
+                const val = e.target.value;
                 updateFailure(idx, "dist_activacion", {
                   ...f.dist_activacion,
-                  params: { ...f.dist_activacion.params, sigma: parseFloat(e.target.value) || 0 },
-                })
-              }
+                  params: { ...f.dist_activacion.params, sigma: val === "" ? "" : parseFloat(val) },
+                });
+              }}
             />
           </label>
         </div>
@@ -468,26 +473,28 @@ export default function GeneratorForm({ node, setEditingNode, elements, onSave }
             a:
             <input
               type="number"
-              value={f.dist_activacion.params?.a || ""}
-              onChange={(e) =>
+              value={f.dist_activacion.params?.a ?? ""}
+              onChange={(e) => {
+                const val = e.target.value;
                 updateFailure(idx, "dist_activacion", {
                   ...f.dist_activacion,
-                  params: { ...f.dist_activacion.params, a: parseFloat(e.target.value) || 0 },
-                })
-              }
+                  params: { ...f.dist_activacion.params, a: val === "" ? "" : parseFloat(val) },
+                });
+              }}
             />
           </label>
           <label>
             b:
             <input
               type="number"
-              value={f.dist_activacion.params?.b || ""}
-              onChange={(e) =>
+              value={f.dist_activacion.params?.b ?? ""}
+              onChange={(e) => {
+                const val = e.target.value;
                 updateFailure(idx, "dist_activacion", {
                   ...f.dist_activacion,
-                  params: { ...f.dist_activacion.params, b: parseFloat(e.target.value) || 0 },
-                })
-              }
+                  params: { ...f.dist_activacion.params, b: val === "" ? "" : parseFloat(val) },
+                });
+              }}
             />
           </label>
         </div>
@@ -498,13 +505,14 @@ export default function GeneratorForm({ node, setEditingNode, elements, onSave }
             Valor fijo:
             <input
               type="number"
-              value={f.dist_activacion.params?.valor || ""}
-              onChange={(e) =>
+              value={f.dist_activacion.params?.valor ?? ""}
+              onChange={(e) => {
+                const val = e.target.value;
                 updateFailure(idx, "dist_activacion", {
                   ...f.dist_activacion,
-                  params: { ...f.dist_activacion.params, valor: parseFloat(e.target.value) || 0 },
-                })
-              }
+                  params: { ...f.dist_activacion.params, valor: val === "" ? "" : parseFloat(val) },
+                });
+              }}
             />
           </label>
         </div>
@@ -534,13 +542,14 @@ export default function GeneratorForm({ node, setEditingNode, elements, onSave }
             λ (Lambda):
             <input
               type="number"
-              value={f.dist_duracion.params?.lambda || ""}
-              onChange={(e) =>
+              value={f.dist_duracion.params?.lambda ?? ""}
+              onChange={(e) => {
+                const val = e.target.value;
                 updateFailure(idx, "dist_duracion", {
                   ...f.dist_duracion,
-                  params: { ...f.dist_duracion.params, lambda: parseFloat(e.target.value) || 0 },
-                })
-              }
+                  params: { ...f.dist_duracion.params, lambda: val === "" ? "" : parseFloat(val) },
+                });
+              }}
             />
           </label>
         </div>
@@ -551,26 +560,28 @@ export default function GeneratorForm({ node, setEditingNode, elements, onSave }
             μ (Mu):
             <input
               type="number"
-              value={f.dist_duracion.params?.mu || ""}
-              onChange={(e) =>
+              value={f.dist_duracion.params?.mu ?? ""}
+              onChange={(e) => {
+                const val = e.target.value;
                 updateFailure(idx, "dist_duracion", {
                   ...f.dist_duracion,
-                  params: { ...f.dist_duracion.params, mu: parseFloat(e.target.value) || 0 },
-                })
-              }
+                  params: { ...f.dist_duracion.params, mu: val === "" ? "" : parseFloat(val) },
+                });
+              }}
             />
           </label>
           <label>
             σ (Sigma):
             <input
               type="number"
-              value={f.dist_duracion.params?.sigma || ""}
-              onChange={(e) =>
+              value={f.dist_duracion.params?.sigma ?? ""}
+              onChange={(e) => {
+                const val = e.target.value;
                 updateFailure(idx, "dist_duracion", {
                   ...f.dist_duracion,
-                  params: { ...f.dist_duracion.params, sigma: parseFloat(e.target.value) || 0 },
-                })
-              }
+                  params: { ...f.dist_duracion.params, sigma: val === "" ? "" : parseFloat(val) },
+                });
+              }}
             />
           </label>
         </div>
@@ -581,26 +592,28 @@ export default function GeneratorForm({ node, setEditingNode, elements, onSave }
             a:
             <input
               type="number"
-              value={f.dist_duracion.params?.a || ""}
-              onChange={(e) =>
+              value={f.dist_duracion.params?.a ?? ""}
+              onChange={(e) => {
+                const val = e.target.value;
                 updateFailure(idx, "dist_duracion", {
                   ...f.dist_duracion,
-                  params: { ...f.dist_duracion.params, a: parseFloat(e.target.value) || 0 },
-                })
-              }
+                  params: { ...f.dist_duracion.params, a: val === "" ? "" : parseFloat(val) },
+                });
+              }}
             />
           </label>
           <label>
             b:
             <input
               type="number"
-              value={f.dist_duracion.params?.b || ""}
-              onChange={(e) =>
+              value={f.dist_duracion.params?.b ?? ""}
+              onChange={(e) => {
+                const val = e.target.value;
                 updateFailure(idx, "dist_duracion", {
                   ...f.dist_duracion,
-                  params: { ...f.dist_duracion.params, b: parseFloat(e.target.value) || 0 },
-                })
-              }
+                  params: { ...f.dist_duracion.params, b: val === "" ? "" : parseFloat(val) },
+                });
+              }}
             />
           </label>
         </div>
@@ -611,13 +624,14 @@ export default function GeneratorForm({ node, setEditingNode, elements, onSave }
             Valor fijo:
             <input
               type="number"
-              value={f.dist_duracion.params?.valor || ""}
-              onChange={(e) =>
+              value={f.dist_duracion.params?.valor ?? ""}
+              onChange={(e) => {
+                const val = e.target.value;
                 updateFailure(idx, "dist_duracion", {
                   ...f.dist_duracion,
-                  params: { ...f.dist_duracion.params, valor: parseFloat(e.target.value) || 0 },
-                })
-              }
+                  params: { ...f.dist_duracion.params, valor: val === "" ? "" : parseFloat(val) },
+                });
+              }}
             />
           </label>
         </div>
@@ -671,13 +685,14 @@ export default function GeneratorForm({ node, setEditingNode, elements, onSave }
               λ (Lambda):
               <input
                 type="number"
-                value={node.data.distribucion.params.lambda || ""}
-                onChange={(e) =>
+                value={node.data.distribucion.params.lambda ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
                   updateDistribucion({
                     ...node.data.distribucion,
-                    params: { ...node.data.distribucion.params, lambda: parseFloat(e.target.value) || 0 },
-                  })
-                }
+                    params: { ...node.data.distribucion.params, lambda: val === "" ? "" : parseFloat(val) },
+                  });
+                }}
               />
             </label>
           </div>
@@ -689,26 +704,28 @@ export default function GeneratorForm({ node, setEditingNode, elements, onSave }
               μ (Mu):
               <input
                 type="number"
-                value={node.data.distribucion.params.mu || ""}
-                onChange={(e) =>
+                value={node.data.distribucion.params.mu ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
                   updateDistribucion({
                     ...node.data.distribucion,
-                    params: { ...node.data.distribucion.params, mu: parseFloat(e.target.value) || 0 },
-                  })
-                }
+                    params: { ...node.data.distribucion.params, mu: val === "" ? "" : parseFloat(val) },
+                  });
+                }}
               />
             </label>
             <label>
               σ (Sigma):
               <input
                 type="number"
-                value={node.data.distribucion.params.sigma || ""}
-                onChange={(e) =>
+                value={node.data.distribucion.params.sigma ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
                   updateDistribucion({
                     ...node.data.distribucion,
-                    params: { ...node.data.distribucion.params, sigma: parseFloat(e.target.value) || 0 },
-                  })
-                }
+                    params: { ...node.data.distribucion.params, sigma: val === "" ? "" : parseFloat(val) },
+                  });
+                }}
               />
             </label>
           </div>
@@ -720,26 +737,28 @@ export default function GeneratorForm({ node, setEditingNode, elements, onSave }
               a:
               <input
                 type="number"
-                value={node.data.distribucion.params.a || ""}
-                onChange={(e) =>
+                value={node.data.distribucion.params.a ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
                   updateDistribucion({
                     ...node.data.distribucion,
-                    params: { ...node.data.distribucion.params, a: parseFloat(e.target.value) || 0 },
-                  })
-                }
+                    params: { ...node.data.distribucion.params, a: val === "" ? "" : parseFloat(val) },
+                  });
+                }}
               />
             </label>
             <label>
               b:
               <input
                 type="number"
-                value={node.data.distribucion.params.b || ""}
-                onChange={(e) =>
+                value={node.data.distribucion.params.b ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
                   updateDistribucion({
                     ...node.data.distribucion,
-                    params: { ...node.data.distribucion.params, b: parseFloat(e.target.value) || 0 },
-                  })
-                }
+                    params: { ...node.data.distribucion.params, b: val === "" ? "" : parseFloat(val) },
+                  });
+                }}
               />
             </label>
           </div>
@@ -751,13 +770,14 @@ export default function GeneratorForm({ node, setEditingNode, elements, onSave }
               Valor fijo:
               <input
                 type="number"
-                value={node.data.distribucion.params.valor || ""}
-                onChange={(e) =>
+                value={node.data.distribucion.params.valor ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
                   updateDistribucion({
                     ...node.data.distribucion,
-                    params: { ...node.data.distribucion.params, valor: parseFloat(e.target.value) || 0 },
-                  })
-                }
+                    params: { ...node.data.distribucion.params, valor: val === "" ? "" : parseFloat(val) },
+                  });
+                }}
               />
             </label>
           </div>
@@ -768,16 +788,7 @@ export default function GeneratorForm({ node, setEditingNode, elements, onSave }
 
 
       {/* Intervalo y Límite */}
-      {node.data.onDemand && (
-        <label>
-          Intervalo:
-          <input
-            type="number"
-            value={node.data.intervalo || ""}
-            onChange={(e) => updateField("intervalo", parseFloat(e.target.value) || 0)}
-          />
-        </label>
-      )}
+      {node.data.onDemand }
       <br />
       <label>
         Límite:

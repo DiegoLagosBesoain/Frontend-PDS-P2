@@ -1,0 +1,103 @@
+.processes-container {
+  height: 100vh; /* ocupa mínimo toda la ventana */
+  display: flex;
+  flex-direction: column; /* para alinear lista y botón */
+  width: 100vw;
+  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  box-sizing: border-box;
+  padding: 20px;
+}
+
+.btn-logout{
+    background-color: #c82333;
+    width: 160px;
+}
+.processes-container h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.btn-create-process {
+  background-color: #28a745;
+  color: white;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: background 0.3s;
+  width: 160px;
+}
+
+.btn-create-process:hover {
+  background-color: #218838;
+}
+
+.process-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.process-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0px 4px 8px rgba(0,0,0,0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.process-name a {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: #007bff;
+}
+
+.process-name a:hover {
+  text-decoration: underline;
+}
+
+.process-actions button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  margin-left: 6px;
+  transition: 0.3s;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+}
+
+.btn-simulations {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.btn-simulations:hover {
+  background-color: #138496;
+}
+

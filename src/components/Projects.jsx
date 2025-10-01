@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import CreateElementModal from "../forms/CreateElementModal.jsx";
+import "./Projects.css";
 
-function Projects({ user }) {
+function Projects({ user , onLogout}) {
   const [projects, setProjects] = useState([]);
   const [modalInfo, setModalInfo] = useState({ show: false, project: null, element: null });
-  const API_URL = import.meta.env.VITE_API_URL || "";
+const API_URL = import.meta.env.VITE_API_URL || "";
 
   // Trae proyectos y sus elementos
   useEffect(() => {
@@ -124,36 +125,36 @@ function Projects({ user }) {
   };
   // -------------------------------------------------------------------------------------
 
+
   return (
-    <div className="container mt-5">
-      <h2>Mis Proyectos</h2>
-      <button className="btn btn-success mb-3" onClick={handleCreateProject}>
+    <div className="projects-container">
+      <h2 className="projects-title">Mis Proyectos</h2>
+      <button className="btn-create" onClick={handleCreateProject}>
         + Crear Proyecto
       </button>
 
-      <ul className="list-group">
+      <ul className="projects-list">
         {projects.map((p) => (
-          <li key={p.id} className="list-group-item">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <li key={p.id} className="project-card">
+            <div className="project-header">
               <div>
-                <Link to={`/projects/${p.id}`}>{p.name}</Link>
+                <Link to={`/projects/${p.id}`} className="project-name">
+                  {p.name}
+                </Link>
                 <br />
-                <small className="text-muted">{p.description}</small>
+                <small className="project-description">{p.description}</small>
               </div>
 
-              <div style={{ display: "flex", gap: "8px" }}>
+              <div className="project-actions">
                 <button
-                  className="btn btn-sm btn-primary"
+                  className="btn-small btn-primary"
                   onClick={() => setModalInfo({ show: true, project: p, element: null })}
                 >
                   + Elemento
                 </button>
-
-                {/* BOTÓN BORRAR PROYECTO */}
                 <button
-                  className="btn btn-sm btn-danger"
+                  className="btn-small btn-danger"
                   onClick={() => handleDeleteProject(p.id)}
-                  title="Eliminar proyecto"
                 >
                   🗑 Borrar
                 </button>
@@ -161,34 +162,31 @@ function Projects({ user }) {
             </div>
 
             {p.elements && p.elements.length > 0 ? (
-              <ul style={{ marginTop: "10px" }}>
+              <ul className="elements-list">
                 {p.elements.map((el) => (
-                  <li
-                    key={el.id}
-                    style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-                  >
-                    <div>
-                      <strong>{el.type}</strong>
-                      {el.params && Object.keys(el.params).length > 0 && (
-                        <div style={{ fontSize: "0.9em", marginTop: "4px" }}>
-                          {Object.entries(el.params).map(([k, v]) => (
-                            <span key={k} style={{ marginRight: 8 }}>
-                              {k}: {v}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                    <li key={el.id} className="element-card">
+                      <div>
+                        <strong className="element-name">{el.type}</strong> {/* 👈 clase nueva */}
+                        {el.params && Object.keys(el.params).length > 0 && (
+                          <div className="element-params">
+                            {Object.entries(el.params).map(([k, v]) => (
+                              <span key={k} className="param-tag">
+                                {k}: {v}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
 
                     <div>
                       <button
-                        className="btn btn-sm btn-secondary me-2"
+                        className="btn-small btn-secondary"
                         onClick={() => setModalInfo({ show: true, project: p, element: el })}
                       >
                         Editar
                       </button>
                       <button
-                        className="btn btn-sm btn-danger"
+                        className="btn-small btn-danger"
                         onClick={() => handleDeleteElement(p.id, el.id)}
                       >
                         Eliminar
@@ -198,7 +196,7 @@ function Projects({ user }) {
                 ))}
               </ul>
             ) : (
-              <small style={{ display: "block", marginTop: 8 }}>Sin elementos</small>
+              <small className="no-elements">Sin elementos</small>
             )}
           </li>
         ))}
@@ -212,6 +210,9 @@ function Projects({ user }) {
           onSave={handleSaveElement}
         />
       )}
+    <button className="btn-logout" onClick={onLogout}>
+      Cerrar sesión
+    </button>
     </div>
   );
 }

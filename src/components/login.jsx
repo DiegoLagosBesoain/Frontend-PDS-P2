@@ -1,6 +1,7 @@
 import React from "react";
 import { auth, provider, signInWithPopup } from "../firebase";
 import axios from "axios";
+import "./Login.css";
 const API_URL = import.meta.env.VITE_API_URL || "";
 function Login({ onLogin }) {
   const handleGoogleLogin = async () => {
@@ -30,9 +31,9 @@ function Login({ onLogin }) {
 };
 
   return (
-    <div className="container mt-5">
-      <h2>Iniciar sesión</h2>
-      <button className="btn btn-danger" onClick={handleGoogleLogin}>
+    <div className="login-container">
+      <h2 className="login-title">Iniciar sesión</h2>
+      <button className="google-btn" onClick={handleGoogleLogin}>
         Iniciar sesión con Google
       </button>
     </div>

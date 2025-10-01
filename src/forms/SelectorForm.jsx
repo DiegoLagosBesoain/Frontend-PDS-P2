@@ -48,7 +48,7 @@ export default function SelectorForm({ node, setEditingNode, elements = [] }) {
   const addFailure = () => {
     setParamsState((prev) => ({
       ...prev,
-      failures: [...prev.failures, { dist_activacion: "", dist_duracion: "" }],
+      failures: [...prev.failures, { dist_activacion: { tipo: "", params: {} }, dist_duracion: { tipo: "", params: {} } }],
     }));
   };
 
@@ -209,14 +209,19 @@ export default function SelectorForm({ node, setEditingNode, elements = [] }) {
             </select>
 
             {/* Intervalo (entero) */}
+            {/* Intervalo (entero) */}
             <label style={{ marginLeft: "10px" }}>
               Intervalo:
               <input
                 type="number"
-                min="1"
-                step="1"
-                value={s.interval || 1}
-                onChange={(e) => updateSensor(idx, "interval", parseInt(e.target.value) || 1)}
+                min="0"
+                step="any"
+                value={s.interval ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const parsed = val === "" ? "" : parseFloat(val);
+                  updateSensor(idx, "interval", parsed);
+                }}
                 style={{ marginLeft: "5px" }}
               />
             </label>
@@ -274,7 +279,7 @@ export default function SelectorForm({ node, setEditingNode, elements = [] }) {
           type="button"
           onClick={() => setParamsState((prev) => ({
             ...prev,
-            sensors: [...prev.sensors, { type: "", id_entradas: [], id_salidas: [], interval: 1 }]
+            sensors: [...prev.sensors, { type: "", id_entradas: [], id_salidas: [], interval: "" }]
           }))}
         >
           ➕ Agregar Sensor
@@ -294,9 +299,9 @@ export default function SelectorForm({ node, setEditingNode, elements = [] }) {
           <label>
             Dist Activación:
             <select
-              value={f.dist_activacion?.tipo || ""}
+              value={f.dist_activacion?.tipo ?? ""}
               onChange={(e) =>
-                updateFailure(idx, "dist_activacion", { tipo: e.target.value, params: {} })
+                updateFailure(idx, "dist_activacion", { tipo: e.target.value, params: f.dist_activacion?.params || {} })
               }
             >
               <option value="">-- Selecciona --</option>
@@ -313,13 +318,16 @@ export default function SelectorForm({ node, setEditingNode, elements = [] }) {
               λ:
               <input
                 type="number"
-                value={f.dist_activacion.params?.lambda || ""}
-                onChange={(e) =>
+                step="any"
+                value={f.dist_activacion.params?.lambda ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const parsed = val === "" ? "" : parseFloat(val);
                   updateFailure(idx, "dist_activacion", {
-                    ...f.dist_activacion,
-                    params: { ...f.dist_activacion.params, lambda: parseFloat(e.target.value) || 0 },
-                  })
-                }
+                    tipo: "Exponencial",
+                    params: { ...f.dist_activacion.params, lambda: parsed },
+                  });
+                }}
               />
             </label>
           )}
@@ -329,26 +337,32 @@ export default function SelectorForm({ node, setEditingNode, elements = [] }) {
                 μ:
                 <input
                   type="number"
-                  value={f.dist_activacion.params?.mu || ""}
-                  onChange={(e) =>
+                  step="any"
+                  value={f.dist_activacion.params?.mu ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const parsed = val === "" ? "" : parseFloat(val);
                     updateFailure(idx, "dist_activacion", {
-                      ...f.dist_activacion,
-                      params: { ...f.dist_activacion.params, mu: parseFloat(e.target.value) || 0 },
-                    })
-                  }
+                      tipo: "Normal",
+                      params: { ...f.dist_activacion.params, mu: parsed },
+                    });
+                  }}
                 />
               </label>
               <label>
                 σ:
                 <input
                   type="number"
-                  value={f.dist_activacion.params?.sigma || ""}
-                  onChange={(e) =>
+                  step="any"
+                  value={f.dist_activacion.params?.sigma ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const parsed = val === "" ? "" : parseFloat(val);
                     updateFailure(idx, "dist_activacion", {
-                      ...f.dist_activacion,
-                      params: { ...f.dist_activacion.params, sigma: parseFloat(e.target.value) || 0 },
-                    })
-                  }
+                      tipo: "Normal",
+                      params: { ...f.dist_activacion.params, sigma: parsed },
+                    });
+                  }}
                 />
               </label>
             </>
@@ -359,26 +373,32 @@ export default function SelectorForm({ node, setEditingNode, elements = [] }) {
                 a:
                 <input
                   type="number"
-                  value={f.dist_activacion.params?.a || ""}
-                  onChange={(e) =>
+                  step="any"
+                  value={f.dist_activacion.params?.a ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const parsed = val === "" ? "" : parseFloat(val);
                     updateFailure(idx, "dist_activacion", {
-                      ...f.dist_activacion,
-                      params: { ...f.dist_activacion.params, a: parseFloat(e.target.value) || 0 },
-                    })
-                  }
+                      tipo: "Uniforme",
+                      params: { ...f.dist_activacion.params, a: parsed },
+                    });
+                  }}
                 />
               </label>
               <label>
                 b:
                 <input
                   type="number"
-                  value={f.dist_activacion.params?.b || ""}
-                  onChange={(e) =>
+                  step="any"
+                  value={f.dist_activacion.params?.b ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const parsed = val === "" ? "" : parseFloat(val);
                     updateFailure(idx, "dist_activacion", {
-                      ...f.dist_activacion,
-                      params: { ...f.dist_activacion.params, b: parseFloat(e.target.value) || 0 },
-                    })
-                  }
+                      tipo: "Uniforme",
+                      params: { ...f.dist_activacion.params, b: parsed },
+                    });
+                  }}
                 />
               </label>
             </>
@@ -388,13 +408,16 @@ export default function SelectorForm({ node, setEditingNode, elements = [] }) {
               Valor fijo:
               <input
                 type="number"
-                value={f.dist_activacion.params?.valor || ""}
-                onChange={(e) =>
+                step="any"
+                value={f.dist_activacion.params?.valor ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const parsed = val === "" ? "" : parseFloat(val);
                   updateFailure(idx, "dist_activacion", {
-                    ...f.dist_activacion,
-                    params: { ...f.dist_activacion.params, valor: parseFloat(e.target.value) || 0 },
-                  })
-                }
+                    tipo: "Fija",
+                    params: { ...f.dist_activacion.params, valor: parsed },
+                  });
+                }}
               />
             </label>
           )}
@@ -403,9 +426,9 @@ export default function SelectorForm({ node, setEditingNode, elements = [] }) {
           <label>
             Dist Duración:
             <select
-              value={f.dist_duracion?.tipo || ""}
+              value={f.dist_duracion?.tipo ?? ""}
               onChange={(e) =>
-                updateFailure(idx, "dist_duracion", { tipo: e.target.value, params: {} })
+                updateFailure(idx, "dist_duracion", { tipo: e.target.value, params: f.dist_duracion?.params || {} })
               }
             >
               <option value="">-- Selecciona --</option>
@@ -422,13 +445,16 @@ export default function SelectorForm({ node, setEditingNode, elements = [] }) {
               λ:
               <input
                 type="number"
-                value={f.dist_duracion.params?.lambda || ""}
-                onChange={(e) =>
+                step="any"
+                value={f.dist_duracion.params?.lambda ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const parsed = val === "" ? "" : parseFloat(val);
                   updateFailure(idx, "dist_duracion", {
-                    ...f.dist_duracion,
-                    params: { ...f.dist_duracion.params, lambda: parseFloat(e.target.value) || 0 },
-                  })
-                }
+                    tipo: "Exponencial",
+                    params: { ...f.dist_duracion.params, lambda: parsed },
+                  });
+                }}
               />
             </label>
           )}
@@ -438,26 +464,32 @@ export default function SelectorForm({ node, setEditingNode, elements = [] }) {
                 μ:
                 <input
                   type="number"
-                  value={f.dist_duracion.params?.mu || ""}
-                  onChange={(e) =>
+                  step="any"
+                  value={f.dist_duracion.params?.mu ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const parsed = val === "" ? "" : parseFloat(val);
                     updateFailure(idx, "dist_duracion", {
-                      ...f.dist_duracion,
-                      params: { ...f.dist_duracion.params, mu: parseFloat(e.target.value) || 0 },
-                    })
-                  }
+                      tipo: "Normal",
+                      params: { ...f.dist_duracion.params, mu: parsed },
+                    });
+                  }}
                 />
               </label>
               <label>
                 σ:
                 <input
                   type="number"
-                  value={f.dist_duracion.params?.sigma || ""}
-                  onChange={(e) =>
+                  step="any"
+                  value={f.dist_duracion.params?.sigma ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const parsed = val === "" ? "" : parseFloat(val);
                     updateFailure(idx, "dist_duracion", {
-                      ...f.dist_duracion,
-                      params: { ...f.dist_duracion.params, sigma: parseFloat(e.target.value) || 0 },
-                    })
-                  }
+                      tipo: "Normal",
+                      params: { ...f.dist_duracion.params, sigma: parsed },
+                    });
+                  }}
                 />
               </label>
             </>
@@ -468,26 +500,32 @@ export default function SelectorForm({ node, setEditingNode, elements = [] }) {
                 a:
                 <input
                   type="number"
-                  value={f.dist_duracion.params?.a || ""}
-                  onChange={(e) =>
+                  step="any"
+                  value={f.dist_duracion.params?.a ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const parsed = val === "" ? "" : parseFloat(val);
                     updateFailure(idx, "dist_duracion", {
-                      ...f.dist_duracion,
-                      params: { ...f.dist_duracion.params, a: parseFloat(e.target.value) || 0 },
-                    })
-                  }
+                      tipo: "Uniforme",
+                      params: { ...f.dist_duracion.params, a: parsed },
+                    });
+                  }}
                 />
               </label>
               <label>
                 b:
                 <input
                   type="number"
-                  value={f.dist_duracion.params?.b || ""}
-                  onChange={(e) =>
+                  step="any"
+                  value={f.dist_duracion.params?.b ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const parsed = val === "" ? "" : parseFloat(val);
                     updateFailure(idx, "dist_duracion", {
-                      ...f.dist_duracion,
-                      params: { ...f.dist_duracion.params, b: parseFloat(e.target.value) || 0 },
-                    })
-                  }
+                      tipo: "Uniforme",
+                      params: { ...f.dist_duracion.params, b: parsed },
+                    });
+                  }}
                 />
               </label>
             </>
@@ -497,13 +535,16 @@ export default function SelectorForm({ node, setEditingNode, elements = [] }) {
               Valor fijo:
               <input
                 type="number"
-                value={f.dist_duracion.params?.valor || ""}
-                onChange={(e) =>
+                step="any"
+                value={f.dist_duracion.params?.valor ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const parsed = val === "" ? "" : parseFloat(val);
                   updateFailure(idx, "dist_duracion", {
-                    ...f.dist_duracion,
-                    params: { ...f.dist_duracion.params, valor: parseFloat(e.target.value) || 0 },
-                  })
-                }
+                    tipo: "Fija",
+                    params: { ...f.dist_duracion.params, valor: parsed },
+                  });
+                }}
               />
             </label>
           )}

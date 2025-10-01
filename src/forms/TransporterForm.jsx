@@ -1,10 +1,11 @@
+// ...existing code...
 import React, { useState, useEffect } from "react";
 
 const SENSOR_TYPES = [
   { value: "contador", label: "Contador" },
   { value: "flujo", label: "Medidor de flujo" },
-  { value: "porcentaje_encendido", label: "Porcentaje de tiempo encendido" },
-  { value: "porcentaje_funcionamiento", label: "Porcentaje de tiempo de funcionamiento" },
+  { value: "porcentaje_tiempo_encendido", label: "Porcentaje de tiempo encendido" },
+  { value: "porcentaje_tiempo_funcionamiento", label: "Porcentaje de tiempo de funcionamiento" },
 ];
 
 export default function TransporterForm({ node, setEditingNode, elements }) {
@@ -81,7 +82,7 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
       <label>
         Nombre:
         <input
-          value={node.data.label || ""}
+          value={node.data.label ?? ""}
           onChange={(e) => updateField("label", e.target.value)}
           style={{ marginLeft: 8 }}
         />
@@ -91,7 +92,7 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
       <label>
         Tipo:
         <select
-          value={node.data.tipo || ""}
+          value={node.data.tipo ?? ""}
           onChange={(e) => updateField("tipo", e.target.value)}
         >
           <option value="">-- Selecciona un tipo --</option>
@@ -103,7 +104,7 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
       <label>
         Elemento:
         <select
-          value={node.data.elemento || ""}
+          value={node.data.elemento ?? ""}
           onChange={(e) => updateField("elemento", e.target.value)}
         >
           <option value="">-- Selecciona un elemento --</option>
@@ -119,7 +120,7 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
       <label>
         Distribución:
         <select
-          value={node.data.distribucion?.tipo || ""}
+          value={node.data.distribucion?.tipo ?? ""}
           onChange={(e) =>
             updateField("distribucion", { tipo: e.target.value, params: {} })
           }
@@ -139,13 +140,13 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
           λ (Lambda):
           <input
             type="number"
-            value={node.data.distribucion.params?.lambda || ""}
+            value={node.data.distribucion.params?.lambda ?? ""}
             onChange={(e) =>
               updateField("distribucion", {
                 ...node.data.distribucion,
                 params: {
                   ...node.data.distribucion.params,
-                  lambda: parseFloat(e.target.value) || 0,
+                  lambda: e.target.value === "" ? "" : parseFloat(e.target.value),
                 },
               })
             }
@@ -159,13 +160,13 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
             μ (Mu):
             <input
               type="number"
-              value={node.data.distribucion.params?.mu || ""}
+              value={node.data.distribucion.params?.mu ?? ""}
               onChange={(e) =>
                 updateField("distribucion", {
                   ...node.data.distribucion,
                   params: {
                     ...node.data.distribucion.params,
-                    mu: parseFloat(e.target.value) || 0,
+                    mu: e.target.value === "" ? "" : parseFloat(e.target.value),
                   },
                 })
               }
@@ -175,13 +176,13 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
             σ (Sigma):
             <input
               type="number"
-              value={node.data.distribucion.params?.sigma || ""}
+              value={node.data.distribucion.params?.sigma ?? ""}
               onChange={(e) =>
                 updateField("distribucion", {
                   ...node.data.distribucion,
                   params: {
                     ...node.data.distribucion.params,
-                    sigma: parseFloat(e.target.value) || 0,
+                    sigma: e.target.value === "" ? "" : parseFloat(e.target.value),
                   },
                 })
               }
@@ -196,13 +197,13 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
             a:
             <input
               type="number"
-              value={node.data.distribucion.params?.a || ""}
+              value={node.data.distribucion.params?.a ?? ""}
               onChange={(e) =>
                 updateField("distribucion", {
                   ...node.data.distribucion,
                   params: {
                     ...node.data.distribucion.params,
-                    a: parseFloat(e.target.value) || 0,
+                    a: e.target.value === "" ? "" : parseFloat(e.target.value),
                   },
                 })
               }
@@ -212,13 +213,13 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
             b:
             <input
               type="number"
-              value={node.data.distribucion.params?.b || ""}
+              value={node.data.distribucion.params?.b ?? ""}
               onChange={(e) =>
                 updateField("distribucion", {
                   ...node.data.distribucion,
                   params: {
                     ...node.data.distribucion.params,
-                    b: parseFloat(e.target.value) || 0,
+                    b: e.target.value === "" ? "" : parseFloat(e.target.value),
                   },
                 })
               }
@@ -232,13 +233,13 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
           Valor fijo:
           <input
             type="number"
-            value={node.data.distribucion.params?.valor || ""}
+            value={node.data.distribucion.params?.valor ?? ""}
             onChange={(e) =>
               updateField("distribucion", {
                 ...node.data.distribucion,
                 params: {
                   ...node.data.distribucion.params,
-                  valor: parseFloat(e.target.value) || 0,
+                  valor: e.target.value === "" ? "" : parseFloat(e.target.value),
                 },
               })
             }
@@ -253,8 +254,8 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
           Tiempo mínimo entre entradas:
           <input
             type="number"
-            value={node.data.t_min_entrada || ""}
-            onChange={(e) => updateField("t_min_entrada", parseFloat(e.target.value) || 0)}
+            value={node.data.t_min_entrada ?? ""}
+            onChange={(e) => updateField("t_min_entrada", e.target.value === "" ? "" : parseFloat(e.target.value))}
           />
         </label>
       )}
@@ -266,8 +267,8 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
             Capacidad:
             <input
               type="number"
-              value={node.data.capacidad || ""}
-              onChange={(e) => updateField("capacidad", parseInt(e.target.value) || 0)}
+              value={node.data.capacidad ?? ""}
+              onChange={(e) => updateField("capacidad", e.target.value === "" ? "" : parseInt(e.target.value, 10))}
             />
           </label>
           <br />
@@ -275,8 +276,8 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
             Tiempo de espera máximo:
             <input
               type="number"
-              value={node.data.t_espera_max || ""}
-              onChange={(e) => updateField("t_espera_max", parseFloat(e.target.value) || 0)}
+              value={node.data.t_espera_max ?? ""}
+              onChange={(e) => updateField("t_espera_max", e.target.value === "" ? "" : parseFloat(e.target.value))}
             />
           </label>
         </>
@@ -289,7 +290,7 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
           <label>
             Tipo:
             <select
-              value={s.type}
+              value={s.type ?? ""}
               onChange={(e) => handleSensorChange(idx, "type", e.target.value)}
             >
               <option value="">-- Selecciona un sensor --</option>
@@ -307,10 +308,12 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
             <input
               type="number"
               min="0"
-              value={s.intervalo || ""}
+              value={s.intervalo ?? ""}
               onChange={(e) => {
-                const val = parseFloat(e.target.value) || 0;
-                handleSensorChange(idx, "intervalo", val < 0 ? 0 : val);
+                const str = e.target.value;
+                const parsed = str === "" ? "" : parseFloat(str);
+                const val = parsed === "" ? "" : (parsed < 0 ? 0 : parsed);
+                handleSensorChange(idx, "intervalo", val);
               }}
               style={{ marginLeft: "5px", width: "80px" }}
             />
@@ -358,7 +361,7 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
           <label>
             Dist Activación:
             <select
-              value={f.dist_activacion?.tipo || ""}
+              value={f.dist_activacion?.tipo ?? ""}
               onChange={(e) =>
                 handleFailureChange(idx, "dist_activacion", { tipo: e.target.value, params: {} })
               }
@@ -377,11 +380,11 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
               λ:
               <input
                 type="number"
-                value={f.dist_activacion.params?.lambda || ""}
+                value={f.dist_activacion.params?.lambda ?? ""}
                 onChange={(e) =>
                   handleFailureChange(idx, "dist_activacion", {
                     ...f.dist_activacion,
-                    params: { ...f.dist_activacion.params, lambda: parseFloat(e.target.value) || 0 },
+                    params: { ...f.dist_activacion.params, lambda: e.target.value === "" ? "" : parseFloat(e.target.value) },
                   })
                 }
               />
@@ -393,11 +396,11 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
                 μ:
                 <input
                   type="number"
-                  value={f.dist_activacion.params?.mu || ""}
+                  value={f.dist_activacion.params?.mu ?? ""}
                   onChange={(e) =>
                     handleFailureChange(idx, "dist_activacion", {
                       ...f.dist_activacion,
-                      params: { ...f.dist_activacion.params, mu: parseFloat(e.target.value) || 0 },
+                      params: { ...f.dist_activacion.params, mu: e.target.value === "" ? "" : parseFloat(e.target.value) },
                     })
                   }
                 />
@@ -406,11 +409,11 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
                 σ:
                 <input
                   type="number"
-                  value={f.dist_activacion.params?.sigma || ""}
+                  value={f.dist_activacion.params?.sigma ?? ""}
                   onChange={(e) =>
                     handleFailureChange(idx, "dist_activacion", {
                       ...f.dist_activacion,
-                      params: { ...f.dist_activacion.params, sigma: parseFloat(e.target.value) || 0 },
+                      params: { ...f.dist_activacion.params, sigma: e.target.value === "" ? "" : parseFloat(e.target.value) },
                     })
                   }
                 />
@@ -423,11 +426,11 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
                 a:
                 <input
                   type="number"
-                  value={f.dist_activacion.params?.a || ""}
+                  value={f.dist_activacion.params?.a ?? ""}
                   onChange={(e) =>
                     handleFailureChange(idx, "dist_activacion", {
                       ...f.dist_activacion,
-                      params: { ...f.dist_activacion.params, a: parseFloat(e.target.value) || 0 },
+                      params: { ...f.dist_activacion.params, a: e.target.value === "" ? "" : parseFloat(e.target.value) },
                     })
                   }
                 />
@@ -436,11 +439,11 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
                 b:
                 <input
                   type="number"
-                  value={f.dist_activacion.params?.b || ""}
+                  value={f.dist_activacion.params?.b ?? ""}
                   onChange={(e) =>
                     handleFailureChange(idx, "dist_activacion", {
                       ...f.dist_activacion,
-                      params: { ...f.dist_activacion.params, b: parseFloat(e.target.value) || 0 },
+                      params: { ...f.dist_activacion.params, b: e.target.value === "" ? "" : parseFloat(e.target.value) },
                     })
                   }
                 />
@@ -452,7 +455,7 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
           <label>
             Dist Duración:
             <select
-              value={f.dist_duracion?.tipo || ""}
+              value={f.dist_duracion?.tipo ?? ""}
               onChange={(e) =>
                 handleFailureChange(idx, "dist_duracion", { tipo: e.target.value, params: {} })
               }
@@ -471,11 +474,11 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
               λ:
               <input
                 type="number"
-                value={f.dist_duracion.params?.lambda || ""}
+                value={f.dist_duracion.params?.lambda ?? ""}
                 onChange={(e) =>
                   handleFailureChange(idx, "dist_duracion", {
                     ...f.dist_duracion,
-                    params: { ...f.dist_duracion.params, lambda: parseFloat(e.target.value) || 0 },
+                    params: { ...f.dist_duracion.params, lambda: e.target.value === "" ? "" : parseFloat(e.target.value) },
                   })
                 }
               />
@@ -487,11 +490,11 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
                 μ:
                 <input
                   type="number"
-                  value={f.dist_duracion.params?.mu || ""}
+                  value={f.dist_duracion.params?.mu ?? ""}
                   onChange={(e) =>
                     handleFailureChange(idx, "dist_duracion", {
                       ...f.dist_duracion,
-                      params: { ...f.dist_duracion.params, mu: parseFloat(e.target.value) || 0 },
+                      params: { ...f.dist_duracion.params, mu: e.target.value === "" ? "" : parseFloat(e.target.value) },
                     })
                   }
                 />
@@ -500,18 +503,49 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
                 σ:
                 <input
                   type="number"
-                  value={f.dist_duracion.params?.sigma || ""}
+                  value={f.dist_duracion.params?.sigma ?? ""}
                   onChange={(e) =>
                     handleFailureChange(idx, "dist_duracion", {
                       ...f.dist_duracion,
-                      params: { ...f.dist_duracion.params, sigma: parseFloat(e.target.value) || 0 },
+                      params: { ...f.dist_duracion.params, sigma: e.target.value === "" ? "" : parseFloat(e.target.value) },
                     })
                   }
                 />
               </label>
             </>
           )}
-          
+
+          {f.dist_duracion?.tipo === "Uniforme" && (
+            <>
+              <label>
+                a:
+                <input
+                  type="number"
+                  value={f.dist_duracion.params?.a ?? ""}
+                  onChange={(e) =>
+                    handleFailureChange(idx, "dist_duracion", {
+                      ...f.dist_duracion,
+                      params: { ...f.dist_duracion.params, a: e.target.value === "" ? "" : parseFloat(e.target.value) },
+                    })
+                  }
+                />
+              </label>
+              <label>
+                b:
+                <input
+                  type="number"
+                  value={f.dist_duracion.params?.b ?? ""}
+                  onChange={(e) =>
+                    handleFailureChange(idx, "dist_duracion", {
+                      ...f.dist_duracion,
+                      params: { ...f.dist_duracion.params, b: e.target.value === "" ? "" : parseFloat(e.target.value) },
+                    })
+                  }
+                />
+              </label>
+            </>
+          )}
+
           <button type="button" onClick={() => {
             const updated = [...paramsState.failures];
             updated.splice(idx, 1);
@@ -527,3 +561,4 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
     </>
   );
 }
+// ...existing code...

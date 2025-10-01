@@ -1,14 +1,14 @@
-// src/components/SimulationPage.jsx
+// src/components/GuestSimulationPage.jsx
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import * as XLSX from "xlsx";
 
 import SimulationDashboard from "./SimulationDashboard";
 import TableView from "./TableView";
 import SensorsView from "./SensorsView";
 import OutputsView from "./OutputsView";
-import StepViewer from "./StepViewer"; // StepViewer at src/components/StepViewer.jsx
+import StepViewer from "./StepViewer";
+import GuestProcessView from "./GuestProcessView"; // <-- usa el componente correcto
 
 const API_URL = import.meta.env.VITE_API_URL || "";
 
@@ -16,48 +16,59 @@ function shortId(id = "") {
   return String(id).slice(0, 8);
 }
 
-export default function SimulationPage() {
+/**
+ * GuestSimulationPage
+ * - Vista de solo-lectura para un invitado: reproduce la lógica de SimulationPage
+ *   pero sin controles de edición. Añade una vista "visualization" que muestra
+ *   el process_def con GuestProcessView (read-only).
+ */
+export default function GuestSimulationPage() {
   const { projectId, pid, SimId } = useParams();
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [simulation, setSimulation] = useState(null);
   const [components, setComponents] = useState([]);
+  const [processDef, setProcessDef] = useState(null); // <-- guardamos processDef si está en la simulación
   const [maxTime, setMaxTime] = useState(0);
   const [exporting, setExporting] = useState(false);
 
-  const [view, setView] = useState("dashboard");
+  const [view, setView] = useState("dashboard"); // 'dashboard' | 'table' | 'sensors' | 'steps' | 'outputs' | 'visualization'
   const [filterParamKey, setFilterParamKey] = useState("");
   const [filterParamValue, setFilterParamValue] = useState("");
   const [searchElementName, setSearchElementName] = useState("");
+
   const [selectedSensorByNode, setSelectedSensorByNode] = useState({});
-
-  // mensajes visibles (strings con prefijo [time] mensaje) que nos manda StepViewer
   const [visibleStepMessages, setVisibleStepMessages] = useState([]);
-
+  
   useEffect(() => {
     let mounted = true;
     const load = async () => {
       try {
         setLoading(true);
         setError(null);
+
         const simRes = await axios.get(`${API_URL}/simulations/${SimId}`);
         if (!mounted) return;
         const sim = simRes.data;
 
-        let processDef = null;
+        // parse processDef if viene dentro de la simulación
+        let pd = null;
         if (sim.process_def) {
           if (typeof sim.process_def === "string") {
-            try { processDef = JSON.parse(sim.process_def); } catch (e) { processDef = null; }
-          } else { processDef = sim.process_def; }
+            try { pd = JSON.parse(sim.process_def); } catch (e) { pd = null; }
+          } else { pd = sim.process_def; }
         } else if (sim.processDef) {
-          processDef = sim.processDef;
+          pd = sim.processDef;
         }
 
         setSimulation(sim);
+        setProcessDef(pd ?? null);
 
-        if (processDef && Array.isArray(processDef.nodes)) {
-          setComponents(processDef.nodes);
+        if (pd && Array.isArray(pd.nodes)) {
+          setComponents(pd.nodes);
         } else {
+          // fallback: intentar obtener componentes del proceso
           try {
             const compsRes = await axios.get(`${API_URL}/processes/${pid}/components`);
             if (!mounted) return;
@@ -68,6 +79,7 @@ export default function SimulationPage() {
           }
         }
 
+        // encontrar max time en register
         const register = sim?.results?.register || {};
         let localMax = 0;
         Object.values(register).forEach((row) => {
@@ -79,6 +91,7 @@ export default function SimulationPage() {
         });
         setMaxTime(localMax);
 
+        // inicializar selectedSensorByNode si nodeStats existe
         const nodeStats = sim?.results?.nodeStats || null;
         if (nodeStats && Array.isArray(nodeStats)) {
           const map = {};
@@ -86,17 +99,18 @@ export default function SimulationPage() {
           setSelectedSensorByNode((prev) => ({ ...map, ...prev }));
         }
       } catch (err) {
-        console.error("Error cargando simulación:", err);
+        console.error("Error cargando simulación o componentes:", err);
         setError(err.response?.data?.error || err.message || "Error desconocido");
       } finally {
         if (mounted) setLoading(false);
       }
     };
+
     load();
     return () => { mounted = false; };
   }, [SimId, pid]);
 
-  // Derived data (igual que antes)
+  // ---------- Derived data (match SimulationPage behavior) ----------
   const rows = useMemo(() => {
     const reg = simulation?.results?.register || {};
     return Object.entries(reg);
@@ -269,11 +283,8 @@ export default function SimulationPage() {
       return true;
     });
   }, [rows, searchElementName, filterParamKey, filterParamValue]);
-  const timeUnit = simulation?.stats?.timeUnit
-    || simulation?.results?.stats?.timeUnit
-    || simulation?.results?.timeUnit
-    || "s";
-  // Export XLSX
+   
+  // Export XLSX (keeps same behavior as SimulationPage)
   const buildAoa = () => {
     const header = ["Elemento", "Parámetros", ...components.map((c) => c.params?.label || c.label || `${c.type} ${shortId(c.id)}`), "Tiempo total"];
     const dataRows = filteredRows.map(([elemName, rowObj]) => {
@@ -294,10 +305,14 @@ export default function SimulationPage() {
     });
     return [header, ...dataRows];
   };
-
+  const timeUnit = simulation?.stats?.timeUnit
+    || simulation?.results?.stats?.timeUnit
+    || simulation?.results?.timeUnit
+    || "s";
   const exportToXLSX = async () => {
     try {
       setExporting(true);
+      const XLSX = (await import("xlsx")).default;
       const aoa = buildAoa();
       const ws = XLSX.utils.aoa_to_sheet(aoa);
       const colWidths = [
@@ -319,47 +334,16 @@ export default function SimulationPage() {
     }
   };
 
-  // select sensor
+  // select sensor tab per node
   const selectSensorForNode = (nodeId, sensorIdx) => {
     setSelectedSensorByNode((prev) => ({ ...prev, [nodeId]: sensorIdx }));
   };
 
-  // callback StepViewer -> SimulationPage
+  // StepViewer callback
   const handleStepChange = useCallback((currentTimeOrIndex, visibleMessagesArr) => {
     if (!Array.isArray(visibleMessagesArr)) return;
     setVisibleStepMessages(visibleMessagesArr.slice());
   }, []);
-    // copy guest link
-  const copyGuestLink = async () => {
-    // construye la URL guest (usa el origin actual)
-    const origin = window.location?.origin || "";
-    const guestPath = `/guest/projects/${projectId}/processes/${pid}/simulations/${SimId}`;
-    const guestUrl = `${origin}${guestPath}`;
-
-    try {
-      if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
-        await navigator.clipboard.writeText(guestUrl);
-      } else {
-        // fallback: textarea temporario
-        const ta = document.createElement("textarea");
-        ta.value = guestUrl;
-        // evitar scroll
-        ta.style.position = "fixed";
-        ta.style.left = "-9999px";
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-      }
-      // feedback al usuario
-      // puedes cambiar alert por algún toast si tienes
-      alert("Link de invitado copiado al portapapeles:\n" + guestUrl);
-    } catch (err) {
-      console.error("No se pudo copiar el link de invitado:", err);
-      alert("Error copiando el link. Puedes copiarlo manualmente:\n" + guestUrl);
-    }
-  };
-
 
   // map de mensajes por componente (recientes)
   const compMessagesMap = useMemo(() => {
@@ -386,11 +370,12 @@ export default function SimulationPage() {
   if (error) return <div style={{ color: "red" }}>Error: {String(error)}</div>;
   if (!simulation) return <div>No se encontró la simulación.</div>;
 
+  // Render (very similar visual to SimulationPage)
   return (
     <div style={{ padding: 16, maxWidth: "100%" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
         <div>
-          <h3 style={{ margin: 0 }}>Simulación: {simulation.id}</h3>
+          <h3 style={{ margin: 0 }}>Simulación (guest): {simulation.id}</h3>
           <div style={{ fontSize: 13, color: "#666" }}>
             <strong>Process:</strong> {pid} — <strong>Creada:</strong>{" "}
             {simulation.timestamp ? new Date(simulation.timestamp).toLocaleString() : "-"}
@@ -398,8 +383,8 @@ export default function SimulationPage() {
         </div>
 
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <button className="btn" onClick={() => setView((v) =>  "dashboard")}>
-            {"Ver Dashboard"}
+          <button className="btn" onClick={() => setView((v) => (v === "dashboard" ? "table" : "dashboard"))}>
+            {view === "dashboard" ? "Ver Tabla" : "Ver Dashboard"}
           </button>
 
           <button className="btn" onClick={() => setView("sensors")} disabled={!simulation?.results?.nodeStats || simulation.results.nodeStats.length === 0}>Ver Sensores</button>
@@ -408,45 +393,50 @@ export default function SimulationPage() {
 
           <button className="btn" onClick={() => setView("steps")} disabled={!simulation?.results?.steps || Object.keys(simulation.results.steps || {}).length === 0}>Ver Steps</button>
 
-          <button className="btn" onClick={() => setView("components")} disabled={!perComponent || perComponent.length === 0}>Ver Componentes</button>
-          <button className="btn" onClick={copyGuestLink} disabled={!projectId || !pid || !SimId}>
-            Enviar la simulacion a un invitado
+          <button
+            className="btn"
+            onClick={() => setView("visualization")}
+            disabled={!(processDef || components.length > 0)}
+            title={processDef ? "Visualización desde process_def" : components.length ? "Visualización desde componentes" : "No hay datos de proceso"}
+          >
+            Ver Visualización
           </button>
+
           <button className="btn btn-outline-primary" onClick={exportToXLSX} disabled={exporting}>{exporting ? "Generando..." : "Descargar .xlsx"}</button>
         </div>
       </div>
 
-      {/* Views */}
+      {/* Views: exact same components usage as SimulationPage (no modifications) */}
       {view === "dashboard" && (
         <SimulationDashboard
           kpis={kpis}
           timelineSeries={timelineSeries}
           histogram={histogram}
+          timeUnit={timeUnit}
           perComponent={perComponent}
           topSlow={topSlow}
           topFast={topFast}
           outputsList={outputsList}
-          timeUnit={timeUnit}
           goToTableWithElement={(n) => { setSearchElementName(String(n)); setView("table"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
         />
       )}
 
       {view === "table" && (
-      <TableView
-        components={components}
-        filteredRows={filteredRows}
-        maxTime={maxTime}
-        timeUnit={timeUnit}            // <-- NUEVO
-        searchElementName={searchElementName}
-        setSearchElementName={setSearchElementName}
-        paramKeys={paramKeys}
-        filterParamKey={filterParamKey}
-        setFilterParamKey={setFilterParamKey}
-        filterParamValue={filterParamValue}
-        setFilterParamValue={setFilterParamValue}
-        paramValuesForKey={paramValuesForKey}
-      />
-)}
+        <TableView
+          components={components}
+          filteredRows={filteredRows}
+          timeUnit={timeUnit}
+          maxTime={maxTime}
+          searchElementName={searchElementName}
+          setSearchElementName={setSearchElementName}
+          paramKeys={paramKeys}
+          filterParamKey={filterParamKey}
+          setFilterParamKey={setFilterParamKey}
+          filterParamValue={filterParamValue}
+          setFilterParamValue={setFilterParamValue}
+          paramValuesForKey={paramValuesForKey}
+        />
+      )}
 
       {view === "sensors" && (
         <SensorsView
@@ -454,8 +444,8 @@ export default function SimulationPage() {
           components={components}
           selectedSensorByNode={selectedSensorByNode}
           selectSensorForNode={selectSensorForNode}
+          timeUnit={timeUnit}
           onBack={() => setView("dashboard")}
-          timeUnit={timeUnit}  // <-- NUEVO
         />
       )}
 
@@ -463,7 +453,6 @@ export default function SimulationPage() {
         <OutputsView outputsList={outputsList} goToTableWithElement={(n) => { setSearchElementName(String(n)); setView("table"); }} />
       )}
 
-      {/* Steps view: StepViewer + tarjetas de componentes WRAP horizontal debajo */}
       {view === "steps" && (
         <div style={{ marginTop: 12 }}>
           <h4>Reproducción paso a paso (Steps)</h4>
@@ -471,10 +460,10 @@ export default function SimulationPage() {
           <StepViewer
             stepsObj={simulation?.results?.steps || {}}
             autoStart={false}
-            initialIntervalMs={2000}
-            mode="time"
+            intervalMs={1000}
             timeUnit={timeUnit}
-            initialTimeDelta={1}
+            mode="time"
+            timeDelta={1}
             getLabelForNodeId={(nodeId) => {
               const comp = components.find((c) => String(c.id) === String(nodeId));
               return comp ? (comp.params?.label || comp.label || `${comp.type} ${shortId(comp.id)}`) : nodeId;
@@ -539,81 +528,115 @@ export default function SimulationPage() {
         </div>
       )}
 
-      {/* ====== Vista COMPONENTS ahora renderiza TableView (como pediste) ====== */}
-      {view === "components" && (
+      {/* Visualization ahora usa GuestProcessView (se encarga de construir el graph ráfaga/fallback) */}
+      {view === "visualization" && (
         <div style={{ marginTop: 12 }}>
-          <h4>Componentes (vista TableView)</h4>
-          <TableView
-            components={components}
-            filteredRows={filteredRows}
-            maxTime={maxTime}
-            searchElementName={searchElementName}
-            setSearchElementName={setSearchElementName}
-            paramKeys={paramKeys}
-            filterParamKey={filterParamKey}
-            timeUnit={timeUnit}
-            setFilterParamKey={setFilterParamKey}
-            filterParamValue={filterParamValue}
-            setFilterParamValue={setFilterParamValue}
-          />
-          <div style={{ marginTop: 8 }}>
-            <button className="btn" onClick={() => setView("dashboard")}>Volver</button>
+          <h4>Visualización (solo lectura)</h4>
+          <div style={{ border: "1px solid var(--border)", borderRadius: 8, padding: 8, background: "var(--card-bg)" }}>
+            <GuestProcessView projectId={projectId} pid={pid} SimId={SimId} processDef={processDef} fitOnLoad={true} />
+            <div style={{ marginTop: 8 }}>
+              <small style={{ color: "#666" }}>Vista read-only del proceso (nodos y conexiones).</small>
+            </div>
           </div>
         </div>
       )}
 
-      <style>{`
-        :root {
-          --bg: #ffffff;
-          --bg-alt: #f5f5f5;
-          --text: #1a1a1a;
-          --muted: #666;
-          --border: #dcdcdc;
-          --accent: #4caf50;
-          --card-bg: #ffffff;
-        }
-        @media (prefers-color-scheme: dark) {
-          :root {
-            --bg: #0f1112;
-            --bg-alt: #16181b;
-            --text: #e9eef1;
-            --muted: #bfc8cf;
-            --border: #2b2f33;
-            --accent: #81c784;
-            --card-bg: #111316;
-          }
-        }
+<style>{`
+  :root {
+    --bg: #ffffff;
+    --bg-alt: #f5f5f5;
+    --text: #1a1a1a;
+    --muted: #666;
+    --border: #dcdcdc;
+    --accent: #4caf50;
+    --card-bg: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1112;
+      --bg-alt: #16181b;
+      --text: #e9eef1;
+      --muted: #bfc8cf;
+      --border: #2b2f33;
+      --accent: #81c784;
+      --card-bg: #111316;
+    }
+  }
 
-        body { background: var(--bg); color: var(--text); }
+  body { background: var(--bg); color: var(--text); }
 
-        .sim-table { border-collapse: collapse; width: 100%; background: var(--card-bg); color: var(--text); table-layout: auto; }
-        .sim-table th, .sim-table td { border: 1px solid var(--border) !important; padding: 8px 10px; text-align: left; vertical-align: top; background: transparent; }
-        .sim-table thead th { background: var(--bg-alt); position: sticky; top: 0; z-index: 3; }
+  .sim-table {
+    border-collapse: collapse;
+    width: 100%;
+    background: var(--card-bg);
+    color: var(--text);
+    table-layout: auto;
+  }
+  .sim-table th,
+  .sim-table td {
+    border: 1px solid var(--border) !important;
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: top;
+    background: transparent;
+  }
+  .sim-table thead th {
+    background: var(--bg-alt);
+    position: sticky;
+    top: 0;
+    z-index: 3;
+  }
 
-        /* --- RESTAURÉ las reglas para la "barrita" de tiempo --- */
-        .time-bar {
-          margin-top: 6px;
-          height: 8px;
-          background: var(--border);
-          border-radius: 4px;
-          overflow: hidden;
-        }
-        .time-bar-fill {
-          height: 100%;
-          background: var(--accent);
-          border-radius: 4px;
-          transition: width 240ms ease;
-        }
+  .time-bar {
+    margin-top: 6px;
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .time-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+    transition: width 240ms ease;
+  }
 
-        .btn { padding: 6px 10px; border-radius: 6px; border: 1px solid #bbb; background: var(--bg-alt); color: var(--text); cursor: pointer; line-height: 1; }
-        .btn:disabled { opacity: 0.6; cursor: default; }
-        .btn-outline-primary { border-color: #0d6efd; color: #0d6efd; background: transparent; }
+  .btn {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #bbb;
+    background: var(--bg-alt);
+    color: var(--text);
+    cursor: pointer;
+    line-height: 1;
+  }
+  .btn:disabled { opacity: 0.6; cursor: default; }
+  .btn-outline-primary { border-color: #0d6efd; color: #0d6efd; background: transparent; }
 
-        svg { display: block; width: 100%; height: auto; }
-        svg line, svg path, svg rect, svg circle, svg text { vector-effect: non-scaling-stroke; shape-rendering: geometricPrecision; }
-        svg line { stroke: var(--border) !important; stroke-width: 1 !important; }
-        svg path { stroke-width: 2 !important; fill: none !important; }
-      `}</style>
+  /* React Flow específico - asegurar visibilidad de edges */
+  .rf-visualization .react-flow__edge-path {
+    stroke: #666666 !important;
+    stroke-width: 2px !important;
+    fill: none !important;
+  }
+
+  .rf-visualization .react-flow__arrowhead,
+  .rf-visualization .react-flow__marker {
+    fill: #666666 !important;
+  }
+
+  .rf-visualization .react-flow__edge:hover .react-flow__edge-path {
+    stroke: #333333 !important;
+    stroke-width: 3px !important;
+  }
+
+  /* Asegurar que los markers de las flechas sean visibles */
+  .rf-visualization svg defs marker path,
+  .rf-visualization svg defs marker polygon {
+    fill: #666666 !important;
+    stroke: none !important;
+  }
+`}</style>
     </div>
   );
 }

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import "./SimulationIndex.css"; // 👈 importa tu css
 
 const API_URL = import.meta.env.VITE_API_URL || "";
 
 export default function SimulationIndex() {
-  const { projectId, pid } = useParams(); // pid = process id
+  const { projectId, pid } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [sims, setSims] = useState([]);
@@ -33,15 +34,14 @@ export default function SimulationIndex() {
   }, [pid]);
 
   const handleDelete = async (simId) => {
-    if (!window.confirm("¿Seguro que quieres eliminar esta simulación? Esta acción no se puede deshacer.")) return;
+    if (!window.confirm("¿Seguro que quieres eliminar esta simulación?")) return;
     try {
       setDeletingId(simId);
       await axios.delete(`${API_URL}/simulations/${simId}`);
-      // actualizar lista en cliente
       setSims((prev) => prev.filter((s) => s.id !== simId));
     } catch (err) {
       console.error("Error eliminando simulación:", err);
-      alert("No se pudo eliminar la simulación. Revisa la consola.");
+      alert("No se pudo eliminar la simulación.");
     } finally {
       setDeletingId(null);
     }
@@ -53,19 +53,15 @@ export default function SimulationIndex() {
     return d.toLocaleString();
   };
 
-  if (loading) return <div>Cargando simulaciones…</div>;
-  if (error) return <div style={{ color: "red" }}>Error: {String(error)}</div>;
+  if (loading) return <div className="simulation-container">Cargando simulaciones…</div>;
+  if (error) return <div className="simulation-container" style={{ color: "red" }}>Error: {String(error)}</div>;
 
   return (
-    <div className="container mt-3">
-      <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12}}>
+    <div className="simulation-container">
+      <div className="simulation-header">
         <h3>Simulaciones del proceso {pid}</h3>
-        <div>
-          <button
-            className="btn btn-secondary"
-            onClick={() => navigate(-1)}
-            style={{marginRight:8}}
-          >
+        <div className="simulation-actions">
+          <button className="btn btn-secondary" onClick={() => navigate(-1)}>
             ← Volver
           </button>
           <Link to={`/projects/${projectId}/processes/${pid}`} className="btn btn-primary">
@@ -75,17 +71,16 @@ export default function SimulationIndex() {
       </div>
 
       {sims.length === 0 ? (
-        <div>No hay simulaciones para este proceso.</div>
+        <div className="simulation-empty">No hay simulaciones para este proceso.</div>
       ) : (
-        <div style={{ overflowX: "auto" }}>
-          <table className="table table-striped">
+        <div className="simulation-table-wrapper">
+          <table className="simulation-table">
             <thead>
               <tr>
                 <th>Timestamp</th>
                 <th>Duración (s)</th>
                 <th>Nodos</th>
                 <th>Edges</th>
-                <th>Total elementos</th>
                 <th>Acciones</th>
               </tr>
             </thead>
@@ -94,15 +89,13 @@ export default function SimulationIndex() {
                 const duration = s.duration ?? (s.stats?.durationProvided ?? "-");
                 const nodesCount = s.stats?.nodesCount ?? "-";
                 const edgesCount = s.stats?.edgesCount ?? "-";
-                const totalElements = s.results?.stats?.totalElements ?? "-";
 
                 return (
                   <tr key={s.id}>
-                    <td style={{whiteSpace:"nowrap"}}>{fmtDate(s.timestamp)}</td>
+                    <td style={{ whiteSpace: "nowrap" }}>{fmtDate(s.timestamp)}</td>
                     <td>{duration}</td>
                     <td>{nodesCount}</td>
                     <td>{edgesCount}</td>
-                    <td>{totalElements}</td>
                     <td>
                       <Link
                         to={`/projects/${projectId}/processes/${pid}/simulations/${s.id}`}
@@ -110,7 +103,6 @@ export default function SimulationIndex() {
                       >
                         Ver
                       </Link>
-
                       <button
                         className="btn btn-sm btn-outline-danger"
                         onClick={() => handleDelete(s.id)}

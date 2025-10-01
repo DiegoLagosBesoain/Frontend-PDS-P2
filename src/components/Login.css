@@ -1,0 +1,48 @@
+/* Centrar el contenedor */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh; /* ocupa toda la pantalla */
+  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+/* Título */
+.login-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+/* Botón de Google */
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #28a745; /* Rojo Google */
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+  box-shadow: 0px 4px 6px rgba(0,0,0,0.2);
+}
+
+/* Hover */
+.google-btn:hover {
+  background-color: #28a745;
+  transform: scale(1.05);
+}
+
+/* Animación de click */
+.google-btn:active {
+  transform: scale(0.98);
+}

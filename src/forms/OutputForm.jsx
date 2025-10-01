@@ -32,7 +32,7 @@ export default function OutputForm({ node, setEditingNode, elements }) {
   const handleAddSensor = () => {
     setParamsState((prev) => ({
       ...prev,
-      sensors: [...prev.sensors, { type: "", id_entradas: [], interval: 1 }], // <-- Agregado interval
+      sensors: [...prev.sensors, { type: "", id_entradas: [], interval: "" }], // permitir 0 y decimales al escribir
     }));
   };
 
@@ -132,9 +132,12 @@ export default function OutputForm({ node, setEditingNode, elements }) {
             Intervalo (s):
             <input
               type="number"
-              min="1"
-              value={s.interval || 1}
-              onChange={(e) => handleSensorChange(idx, "interval", parseInt(e.target.value))}
+              min="0"
+              value={s.interval ?? ""}
+              onChange={(e) => {
+                const v = e.target.value === "" ? "" : parseFloat(e.target.value);
+                handleSensorChange(idx, "interval", v);
+              }}
               style={{ width: 80, marginLeft: 5 }}
             />
           </label>
@@ -195,11 +198,11 @@ export default function OutputForm({ node, setEditingNode, elements }) {
           λ (Lambda):
           <input
             type="number"
-            value={f.dist_activacion.params?.lambda || ""}
+            value={f.dist_activacion.params?.lambda ?? ""}
             onChange={(e) =>
               handleFailureChange(idx, "dist_activacion", {
                 ...f.dist_activacion,
-                params: { ...f.dist_activacion.params, lambda: parseFloat(e.target.value) || 0 },
+                params: { ...f.dist_activacion.params, lambda: e.target.value === "" ? "" : parseFloat(e.target.value) },
               })
             }
           />
@@ -212,11 +215,11 @@ export default function OutputForm({ node, setEditingNode, elements }) {
           μ (Mu):
           <input
             type="number"
-            value={f.dist_activacion.params?.mu || ""}
+            value={f.dist_activacion.params?.mu ?? ""}
             onChange={(e) =>
               handleFailureChange(idx, "dist_activacion", {
                 ...f.dist_activacion,
-                params: { ...f.dist_activacion.params, mu: parseFloat(e.target.value) || 0 },
+                params: { ...f.dist_activacion.params, mu: e.target.value === "" ? "" : parseFloat(e.target.value) },
               })
             }
           />
@@ -225,11 +228,11 @@ export default function OutputForm({ node, setEditingNode, elements }) {
           σ (Sigma):
           <input
             type="number"
-            value={f.dist_activacion.params?.sigma || ""}
+            value={f.dist_activacion.params?.sigma ?? ""}
             onChange={(e) =>
               handleFailureChange(idx, "dist_activacion", {
                 ...f.dist_activacion,
-                params: { ...f.dist_activacion.params, sigma: parseFloat(e.target.value) || 0 },
+                params: { ...f.dist_activacion.params, sigma: e.target.value === "" ? "" : parseFloat(e.target.value) },
               })
             }
           />
@@ -242,11 +245,11 @@ export default function OutputForm({ node, setEditingNode, elements }) {
           a:
           <input
             type="number"
-            value={f.dist_activacion.params?.a || ""}
+            value={f.dist_activacion.params?.a ?? ""}
             onChange={(e) =>
               handleFailureChange(idx, "dist_activacion", {
                 ...f.dist_activacion,
-                params: { ...f.dist_activacion.params, a: parseFloat(e.target.value) || 0 },
+                params: { ...f.dist_activacion.params, a: e.target.value === "" ? "" : parseFloat(e.target.value) },
               })
             }
           />
@@ -255,11 +258,11 @@ export default function OutputForm({ node, setEditingNode, elements }) {
           b:
           <input
             type="number"
-            value={f.dist_activacion.params?.b || ""}
+            value={f.dist_activacion.params?.b ?? ""}
             onChange={(e) =>
               handleFailureChange(idx, "dist_activacion", {
                 ...f.dist_activacion,
-                params: { ...f.dist_activacion.params, b: parseFloat(e.target.value) || 0 },
+                params: { ...f.dist_activacion.params, b: e.target.value === "" ? "" : parseFloat(e.target.value) },
               })
             }
           />
@@ -272,11 +275,11 @@ export default function OutputForm({ node, setEditingNode, elements }) {
           Valor fijo:
           <input
             type="number"
-            value={f.dist_activacion.params?.valor || ""}
+            value={f.dist_activacion.params?.valor ?? ""}
             onChange={(e) =>
               handleFailureChange(idx, "dist_activacion", {
                 ...f.dist_activacion,
-                params: { ...f.dist_activacion.params, valor: parseFloat(e.target.value) || 0 },
+                params: { ...f.dist_activacion.params, valor: e.target.value === "" ? "" : parseFloat(e.target.value) },
               })
             }
           />
@@ -308,11 +311,11 @@ export default function OutputForm({ node, setEditingNode, elements }) {
           λ (Lambda):
           <input
             type="number"
-            value={f.dist_duracion.params?.lambda || ""}
+            value={f.dist_duracion.params?.lambda ?? ""}
             onChange={(e) =>
               handleFailureChange(idx, "dist_duracion", {
                 ...f.dist_duracion,
-                params: { ...f.dist_duracion.params, lambda: parseFloat(e.target.value) || 0 },
+                params: { ...f.dist_duracion.params, lambda: e.target.value === "" ? "" : parseFloat(e.target.value) },
               })
             }
           />
@@ -325,11 +328,11 @@ export default function OutputForm({ node, setEditingNode, elements }) {
           μ (Mu):
           <input
             type="number"
-            value={f.dist_duracion.params?.mu || ""}
+            value={f.dist_duracion.params?.mu ?? ""}
             onChange={(e) =>
               handleFailureChange(idx, "dist_duracion", {
                 ...f.dist_duracion,
-                params: { ...f.dist_duracion.params, mu: parseFloat(e.target.value) || 0 },
+                params: { ...f.dist_duracion.params, mu: e.target.value === "" ? "" : parseFloat(e.target.value) },
               })
             }
           />
@@ -338,11 +341,11 @@ export default function OutputForm({ node, setEditingNode, elements }) {
           σ (Sigma):
           <input
             type="number"
-            value={f.dist_duracion.params?.sigma || ""}
+            value={f.dist_duracion.params?.sigma ?? ""}
             onChange={(e) =>
               handleFailureChange(idx, "dist_duracion", {
                 ...f.dist_duracion,
-                params: { ...f.dist_duracion.params, sigma: parseFloat(e.target.value) || 0 },
+                params: { ...f.dist_duracion.params, sigma: e.target.value === "" ? "" : parseFloat(e.target.value) },
               })
             }
           />
@@ -355,11 +358,11 @@ export default function OutputForm({ node, setEditingNode, elements }) {
           a:
           <input
             type="number"
-            value={f.dist_duracion.params?.a || ""}
+            value={f.dist_duracion.params?.a ?? ""}
             onChange={(e) =>
               handleFailureChange(idx, "dist_duracion", {
                 ...f.dist_duracion,
-                params: { ...f.dist_duracion.params, a: parseFloat(e.target.value) || 0 },
+                params: { ...f.dist_duracion.params, a: e.target.value === "" ? "" : parseFloat(e.target.value) },
               })
             }
           />
@@ -368,11 +371,11 @@ export default function OutputForm({ node, setEditingNode, elements }) {
           b:
           <input
             type="number"
-            value={f.dist_duracion.params?.b || ""}
+            value={f.dist_duracion.params?.b ?? ""}
             onChange={(e) =>
               handleFailureChange(idx, "dist_duracion", {
                 ...f.dist_duracion,
-                params: { ...f.dist_duracion.params, b: parseFloat(e.target.value) || 0 },
+                params: { ...f.dist_duracion.params, b: e.target.value === "" ? "" : parseFloat(e.target.value) },
               })
             }
           />
@@ -385,11 +388,11 @@ export default function OutputForm({ node, setEditingNode, elements }) {
           Valor fijo:
           <input
             type="number"
-            value={f.dist_duracion.params?.valor || ""}
+            value={f.dist_duracion.params?.valor ?? ""}
             onChange={(e) =>
               handleFailureChange(idx, "dist_duracion", {
                 ...f.dist_duracion,
-                params: { ...f.dist_duracion.params, valor: parseFloat(e.target.value) || 0 },
+                params: { ...f.dist_duracion.params, valor: e.target.value === "" ? "" : parseFloat(e.target.value) },
               })
             }
           />

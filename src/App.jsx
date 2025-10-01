@@ -6,6 +6,7 @@ import Processes from "./components/Processes.jsx";
 import Playground from "./Playground.jsx";
 import SimulationPage from "./components/SimulationPage.jsx"
 import SimulationIndex from "./components/SimulationIndex.jsx";
+import GuestProcessAndSimulations from "./components/GuestPlaygroundAndSimulations.jsx";
 function App() {
   const [user, setUser] = useState(() => {
   const storedUser = localStorage.getItem("user");
@@ -31,11 +32,11 @@ const handleLogout = () => {
         {/* Rutas protegidas */}
         <Route
           path="/projects"
-          element={user ? <Projects user={user} /> : <Navigate to="/" />}
+          element={user ? <Projects user={user} onLogout={handleLogout}/> : <Navigate to="/" />}
         />
         <Route
           path="/projects/:projectId"
-          element={user ? <Processes user={user} /> : <Navigate to="/" />}
+          element={user ? <Processes user={user} onLogout={handleLogout}/> : <Navigate to="/" />}
         />
         <Route
           path="/projects/:projectId/processes/:pid"
@@ -52,11 +53,12 @@ const handleLogout = () => {
           element={user ? <SimulationIndex  /> : <Navigate to="/" />}
         
         />
+        <Route path="/guest/projects/:projectId/processes/:pid/simulations/:SimId" element={<GuestProcessAndSimulations />} />
         
         
       </Routes>
-      <button onClick={handleLogout}>Cerrar sesión</button>
-    </Router>
+        {/* <button onClick={handleLogout}>Cerrar sesión</button> */}
+      </Router>
   );
 }
 

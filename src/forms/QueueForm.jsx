@@ -62,7 +62,7 @@ export default function QueueForm({ node, setEditingNode, elements }) {
   const addFailure = () => {
     setParamsState((prev) => ({
       ...prev,
-      failures: [...prev.failures, { dist_activacion: "", dist_duracion: "" }],
+      failures: [...prev.failures, { dist_activacion: { tipo: "", params: {} }, dist_duracion: { tipo: "", params: {} } }],
     }));
   };
 
@@ -404,16 +404,18 @@ export default function QueueForm({ node, setEditingNode, elements }) {
       {/* Intervalo de muestreo */}
       <label style={{ marginLeft: "10px" }}>
         Intervalo:
-        <input
-          type="number"
-          min="0"
-          value={s.intervalo || ""}
-          onChange={(e) => {
-            const val = parseFloat(e.target.value) || 0;
-            updateSensor(idx, "intervalo", val < 0 ? 0 : val);
-          }}
-          style={{ marginLeft: "5px", width: "80px" }}
-        />
+          <input
+            type="number"
+            min="0"
+            value={s.intervalo ?? ""}
+            onChange={(e) => {
+              const raw = e.target.value;
+              const parsed = raw === "" ? "" : parseFloat(raw);
+              const safe = parsed === "" ? "" : (parsed < 0 ? 0 : parsed);
+              updateSensor(idx, "intervalo", safe);
+            }}
+            style={{ marginLeft: "5px", width: "80px" }}
+          />
       </label>
 
       {/* Entradas disponibles */}
@@ -502,13 +504,14 @@ export default function QueueForm({ node, setEditingNode, elements }) {
                 λ:
                 <input
                   type="number"
-                  value={f.dist_activacion.params?.lambda || ""}
-                  onChange={(e) =>
+                  value={f.dist_activacion.params?.lambda ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
                     updateFailure(idx, "dist_activacion", {
                       ...f.dist_activacion,
-                      params: { ...f.dist_activacion.params, lambda: parseFloat(e.target.value) || 0 },
-                    })
-                  }
+                      params: { ...f.dist_activacion.params, lambda: val === "" ? "" : parseFloat(val) },
+                    });
+                  }}
                 />
               </label>
             )}
@@ -518,26 +521,28 @@ export default function QueueForm({ node, setEditingNode, elements }) {
                   μ:
                   <input
                     type="number"
-                    value={f.dist_activacion.params?.mu || ""}
-                    onChange={(e) =>
+                    value={f.dist_activacion.params?.mu ?? ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
                       updateFailure(idx, "dist_activacion", {
                         ...f.dist_activacion,
-                        params: { ...f.dist_activacion.params, mu: parseFloat(e.target.value) || 0 },
-                      })
-                    }
+                        params: { ...f.dist_activacion.params, mu: val === "" ? "" : parseFloat(val) },
+                      });
+                    }}
                   />
                 </label>
                 <label>
                   σ:
                   <input
                     type="number"
-                    value={f.dist_activacion.params?.sigma || ""}
-                    onChange={(e) =>
+                    value={f.dist_activacion.params?.sigma ?? ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
                       updateFailure(idx, "dist_activacion", {
                         ...f.dist_activacion,
-                        params: { ...f.dist_activacion.params, sigma: parseFloat(e.target.value) || 0 },
-                      })
-                    }
+                        params: { ...f.dist_activacion.params, sigma: val === "" ? "" : parseFloat(val) },
+                      });
+                    }}
                   />
                 </label>
               </>
@@ -548,26 +553,28 @@ export default function QueueForm({ node, setEditingNode, elements }) {
                   a:
                   <input
                     type="number"
-                    value={f.dist_activacion.params?.a || ""}
-                    onChange={(e) =>
+                    value={f.dist_activacion.params?.a ?? ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
                       updateFailure(idx, "dist_activacion", {
                         ...f.dist_activacion,
-                        params: { ...f.dist_activacion.params, a: parseFloat(e.target.value) || 0 },
-                      })
-                    }
+                        params: { ...f.dist_activacion.params, a: val === "" ? "" : parseFloat(val) },
+                      });
+                    }}
                   />
                 </label>
                 <label>
                   b:
                   <input
                     type="number"
-                    value={f.dist_activacion.params?.b || ""}
-                    onChange={(e) =>
+                    value={f.dist_activacion.params?.b ?? ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
                       updateFailure(idx, "dist_activacion", {
                         ...f.dist_activacion,
-                        params: { ...f.dist_activacion.params, b: parseFloat(e.target.value) || 0 },
-                      })
-                    }
+                        params: { ...f.dist_activacion.params, b: val === "" ? "" : parseFloat(val) },
+                      });
+                    }}
                   />
                 </label>
               </>
@@ -577,13 +584,14 @@ export default function QueueForm({ node, setEditingNode, elements }) {
                 Valor fijo:
                 <input
                   type="number"
-                  value={f.dist_activacion.params?.valor || ""}
-                  onChange={(e) =>
+                  value={f.dist_activacion.params?.valor ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
                     updateFailure(idx, "dist_activacion", {
                       ...f.dist_activacion,
-                      params: { ...f.dist_activacion.params, valor: parseFloat(e.target.value) || 0 },
-                    })
-                  }
+                      params: { ...f.dist_activacion.params, valor: val === "" ? "" : parseFloat(val) },
+                    });
+                  }}
                 />
               </label>
             )}
@@ -611,13 +619,14 @@ export default function QueueForm({ node, setEditingNode, elements }) {
                 λ:
                 <input
                   type="number"
-                  value={f.dist_duracion.params?.lambda || ""}
-                  onChange={(e) =>
+                  value={f.dist_duracion.params?.lambda ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
                     updateFailure(idx, "dist_duracion", {
                       ...f.dist_duracion,
-                      params: { ...f.dist_duracion.params, lambda: parseFloat(e.target.value) || 0 },
-                    })
-                  }
+                      params: { ...f.dist_duracion.params, lambda: val === "" ? "" : parseFloat(val) },
+                    });
+                  }}
                 />
               </label>
             )}
@@ -625,29 +634,31 @@ export default function QueueForm({ node, setEditingNode, elements }) {
               <>
                 <label>
                   μ:
-                  <input
-                    type="number"
-                    value={f.dist_duracion.params?.mu || ""}
-                    onChange={(e) =>
-                      updateFailure(idx, "dist_duracion", {
-                        ...f.dist_duracion,
-                        params: { ...f.dist_duracion.params, mu: parseFloat(e.target.value) || 0 },
-                      })
-                    }
-                  />
+                    <input
+                      type="number"
+                      value={f.dist_duracion.params?.mu ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        updateFailure(idx, "dist_duracion", {
+                          ...f.dist_duracion,
+                          params: { ...f.dist_duracion.params, mu: val === "" ? "" : parseFloat(val) },
+                        });
+                      }}
+                    />
                 </label>
                 <label>
                   σ:
-                  <input
-                    type="number"
-                    value={f.dist_duracion.params?.sigma || ""}
-                    onChange={(e) =>
-                      updateFailure(idx, "dist_duracion", {
-                        ...f.dist_duracion,
-                        params: { ...f.dist_duracion.params, sigma: parseFloat(e.target.value) || 0 },
-                      })
-                    }
-                  />
+                    <input
+                      type="number"
+                      value={f.dist_duracion.params?.sigma ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        updateFailure(idx, "dist_duracion", {
+                          ...f.dist_duracion,
+                          params: { ...f.dist_duracion.params, sigma: val === "" ? "" : parseFloat(val) },
+                        });
+                      }}
+                    />
                 </label>
               </>
             )}
@@ -655,29 +666,31 @@ export default function QueueForm({ node, setEditingNode, elements }) {
               <>
                 <label>
                   a:
-                  <input
-                    type="number"
-                    value={f.dist_duracion.params?.a || ""}
-                    onChange={(e) =>
-                      updateFailure(idx, "dist_duracion", {
-                        ...f.dist_duracion,
-                        params: { ...f.dist_duracion.params, a: parseFloat(e.target.value) || 0 },
-                      })
-                    }
-                  />
+                    <input
+                      type="number"
+                      value={f.dist_duracion.params?.a ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        updateFailure(idx, "dist_duracion", {
+                          ...f.dist_duracion,
+                          params: { ...f.dist_duracion.params, a: val === "" ? "" : parseFloat(val) },
+                        });
+                      }}
+                    />
                 </label>
                 <label>
                   b:
-                  <input
-                    type="number"
-                    value={f.dist_duracion.params?.b || ""}
-                    onChange={(e) =>
-                      updateFailure(idx, "dist_duracion", {
-                        ...f.dist_duracion,
-                        params: { ...f.dist_duracion.params, b: parseFloat(e.target.value) || 0 },
-                      })
-                    }
-                  />
+                    <input
+                      type="number"
+                      value={f.dist_duracion.params?.b ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        updateFailure(idx, "dist_duracion", {
+                          ...f.dist_duracion,
+                          params: { ...f.dist_duracion.params, b: val === "" ? "" : parseFloat(val) },
+                        });
+                      }}
+                    />
                 </label>
               </>
             )}
@@ -686,13 +699,14 @@ export default function QueueForm({ node, setEditingNode, elements }) {
                 Valor fijo:
                 <input
                   type="number"
-                  value={f.dist_duracion.params?.valor || ""}
-                  onChange={(e) =>
+                  value={f.dist_duracion.params?.valor ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
                     updateFailure(idx, "dist_duracion", {
                       ...f.dist_duracion,
-                      params: { ...f.dist_duracion.params, valor: parseFloat(e.target.value) || 0 },
-                    })
-                  }
+                      params: { ...f.dist_duracion.params, valor: val === "" ? "" : parseFloat(val) },
+                    });
+                  }}
                 />
               </label>
             )}

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link,useNavigate } from "react-router-dom";
 import axios from "axios";
+import "./Processes.css";
+
 const API_URL = import.meta.env.VITE_API_URL || "";
-function Processes({ user }) {
+function Processes({ user, onLogout }) {
   const navigate=useNavigate()
   const { projectId } = useParams();
   const [processes, setProcesses] = useState([]);
@@ -53,42 +55,48 @@ function Processes({ user }) {
   };
   // ------------------------------------------------
 
+
   return (
-    <div className="container mt-5">
+    <div className="processes-container">
       <h2>Procesos del Proyecto</h2>
-      <button className="btn btn-primary mb-3" onClick={handleCreate}>
+      <button className="btn-create-process" onClick={handleCreate}>
         + Crear Proceso
       </button>
-      <ul className="list-group">
+
+      <ul className="process-list">
         {processes.map((p) => (
-          <li key={p.id} className="list-group-item d-flex justify-content-between align-items-center">
-            <div>
+          <li key={p.id} className="process-card">
+            <div className="process-name">
               <Link to={`/projects/${projectId}/processes/${p.id}`}>{p.name}</Link>
             </div>
 
-            <div style={{ display: "flex", gap: 8 }}>
-              <button className="btn btn-sm btn-secondary" onClick={() => handleDuplicate(p)}>
+            <div className="process-actions">
+              <button className="btn-secondary" onClick={() => handleDuplicate(p)}>
                 Duplicar
               </button>
 
-              <button
-                className="btn btn-sm btn-danger"
-                onClick={() => handleDelete(p.id)}
-              >
+              <button className="btn-danger" onClick={() => handleDelete(p.id)}>
                 Eliminar
               </button>
+
               <button
-                className="btn btn-sm btn-danger"
-                onClick={() => navigate(`/projects/${projectId}/processes/${p.id}/simulations`)}
+                className="btn-simulations"
+                onClick={() =>
+                  navigate(`/projects/${projectId}/processes/${p.id}/simulations`)
+                }
               >
-                ver Simulaciones
+                Ver Simulaciones
               </button>
             </div>
           </li>
         ))}
       </ul>
+      <button className="btn-logout" onClick={onLogout}>
+          Cerrar sesión
+      </button>
     </div>
   );
 }
 
 export default Processes;
+

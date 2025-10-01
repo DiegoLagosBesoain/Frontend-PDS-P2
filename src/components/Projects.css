@@ -1,0 +1,156 @@
+.projects-container {
+  width: 100vw;
+  height: 100vh;
+  padding: 20px;
+  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.projects-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+}
+.btn-logout{
+    background-color: #c82333;
+    width: 160px;
+}
+.btn-create {
+  background-color: #28a745;
+  color: white;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: background 0.3s;
+  width: 160px;
+}
+
+.btn-create:hover {
+  background-color: #218838;
+  width: 160px;
+}
+
+/* Lista de proyectos */
+.projects-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.project-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 15px;
+  box-shadow: 0px 4px 8px rgba(0,0,0,0.08);
+}
+
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.project-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: #007bff;
+}
+
+.project-name:hover {
+  text-decoration: underline;
+}
+
+.project-description {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+/* Botones pequeños */
+.btn-small {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  margin-left: 6px;
+  transition: 0.3s;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0069d9;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+}
+
+/* Lista de elementos */
+.elements-list {
+  list-style: none;
+  margin-top: 12px;
+  padding-left: 0;
+}
+
+
+.element-name {
+  color: #007bff;   /* azul estilo Bootstrap */
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+
+.element-card {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.element-params {
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.param-tag {
+  background: #e9ecef;
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin-right: 6px;
+  display: inline-block;
+}
+
+.no-elements {
+  display: block;
+  margin-top: 8px;
+  color: #777;
+  font-style: italic;
+}
+
