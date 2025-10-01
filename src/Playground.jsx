@@ -16,7 +16,6 @@ import SelectorNode from "./nodes/SelectorNode";
 import SelectorForm from "./forms/SelectorForm";
 import { useParams, useNavigate } from "react-router-dom";
 import { validateProcessDef } from "./simulation_rules";
-import * as htmlToImage from "html-to-image";
 
 import {
   ReactFlow,
@@ -34,7 +33,7 @@ import "@xyflow/react/dist/style.css";
 // nueva importación para screenshot
 import html2canvas from "html2canvas";
 
-const API_URL = import.meta.env.VITE_API_URL || "";;
+const API_URL = import.meta.env.VITE_API_URL || "";
 
 const nodeTypes = {
   generator: GeneratorNode,
@@ -337,13 +336,9 @@ export default function Playground() {
         const newEdges = eds.filter(
           (e) => e.source !== node.id && e.target !== node.id
         );
-
-        
-
-        
-
         return newEdges;
       });
+
       const removedEdges = edges.filter(
           (e) => e.source === node.id || e.target === node.id
         );
@@ -485,102 +480,170 @@ export default function Playground() {
   };
 
   const handleScreenshot = async () => {
-  const node = flowWrapperRef.current;
-  if (!node) {
-    alert("Contenedor de ReactFlow no encontrado");
-    return;
-  }
-
-  // helper: descarga blob
-  const downloadBlob = (blob, filename) => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename || "screenshot.png";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 2000);
-  };
-
-  // Clona el nodo y copia estilos computados inline a cada elemento
-  const cloneAndInlineStyles = (origEl) => {
-    const clone = origEl.cloneNode(true);
-
-    const origAll = Array.from(origEl.querySelectorAll("*"));
-    const cloneAll = Array.from(clone.querySelectorAll("*"));
-
-    // incluir el elemento raíz también
-    origAll.unshift(origEl);
-    cloneAll.unshift(clone);
-
-    for (let i = 0; i < origAll.length; i++) {
-      const o = origAll[i];
-      const c = cloneAll[i];
-      if (!c || !o) continue;
-      const cs = window.getComputedStyle(o);
-
-      // Construimos cssText a partir de todas las propiedades computadas
-      // (esto es intensivo pero pequeño para solo el contenedor)
-      let cssText = "";
-      for (let j = 0; j < cs.length; j++) {
-        const prop = cs[j];
-        const val = cs.getPropertyValue(prop);
-        cssText += `${prop}:${val};`;
-      }
-      c.style.cssText = cssText;
-
-      // Para SVG <use> / <marker> a veces conviene también copiar atributos
-      // inline (como 'fill' y 'stroke') si existen como atributos en el original.
-      // Copiamos atributos relevantes:
-      ["fill", "stroke", "stroke-width", "d", "marker-end", "marker-start"].forEach(attr => {
-        if (o.getAttribute && o.getAttribute(attr) != null) {
-          try { c.setAttribute(attr, o.getAttribute(attr)); } catch (e) { /* ignore */ }
-        }
-      });
-    }
-
-    return clone;
-  };
-
-  // crear clone y colocarlo fuera de pantalla para que html2canvas lo pueda procesar
-  const clone = cloneAndInlineStyles(node);
-  // Asegurarnos que el clone tiene el mismo tamaño y fondo visible
-  const origRect = node.getBoundingClientRect();
-  clone.style.position = "fixed";
-  clone.style.left = `${origRect.left}px`;
-  clone.style.top = `${origRect.top}px`;
-  clone.style.width = `${origRect.width}px`;
-  clone.style.height = `${origRect.height}px`;
-  clone.style.zIndex = 999999;
-  clone.style.pointerEvents = "none";
-  // Mantener fondo (si lo tuvieses definido por variables)
-  clone.style.background = window.getComputedStyle(node).background || "transparent";
-
-  document.body.appendChild(clone);
-
-  try {
-    const scale = Math.min(2, window.devicePixelRatio || 1);
-    const canvas = await html2canvas(clone, {
-      useCORS: true,
-      scale,
-      logging: false,
-      backgroundColor: null,
-    });
-    const blob = await new Promise((res) => canvas.toBlob(res, "image/png"));
-    if (!blob) {
-      alert("No se pudo generar la imagen");
+    const node = flowWrapperRef.current;
+    if (!node) {
+      alert("Contenedor de ReactFlow no encontrado");
       return;
     }
-    downloadBlob(blob, `playground_screenshot_${Date.now()}.png`);
-  } catch (err) {
-    console.error("Error generando screenshot:", err);
-    alert("Error al generar screenshot (ver consola).");
-  } finally {
-    // limpiar clone
-    document.body.removeChild(clone);
-  }
-};
+
+    // Función mejorada para clonar incluyendo SVG y markers
+    const cloneAndInlineStyles = (origEl) => {
+      const clone = origEl.cloneNode(true);
+
+      // Copiar todos los elementos <style> del documento al clone
+      const styles = document.querySelectorAll('style, link[rel="stylesheet"]');
+      styles.forEach(style => {
+        const clonedStyle = style.cloneNode(true);
+        clone.appendChild(clonedStyle);
+      });
+
+      const origAll = Array.from(origEl.querySelectorAll("*"));
+      const cloneAll = Array.from(clone.querySelectorAll("*"));
+
+      // incluir el elemento raíz también
+      origAll.unshift(origEl);
+      cloneAll.unshift(clone);
+
+      for (let i = 0; i < origAll.length; i++) {
+        const o = origAll[i];
+        const c = cloneAll[i];
+        if (!c || !o) continue;
+        
+        const cs = window.getComputedStyle(o);
+
+        // Para elementos SVG, preservar atributos importantes
+        if (o.tagName && (o.tagName.toLowerCase().includes('svg') || o.namespaceURI === 'http://www.w3.org/2000/svg')) {
+          // Copiar todos los atributos SVG
+          Array.from(o.attributes || []).forEach(attr => {
+            try {
+              c.setAttribute(attr.name, attr.value);
+            } catch (e) {
+              // Ignorar errores de atributos no válidos
+            }
+          });
+        }
+
+        // Aplicar estilos computados
+        let cssText = "";
+        for (let j = 0; j < cs.length; j++) {
+          const prop = cs[j];
+          const val = cs.getPropertyValue(prop);
+          if (val && val !== 'none' && val !== '') {
+            cssText += `${prop}:${val}!important;`;
+          }
+        }
+        c.style.cssText = cssText;
+
+        // Para elementos SVG específicos, forzar visibilidad
+        if (o.tagName) {
+          const tagName = o.tagName.toLowerCase();
+          if (['path', 'line', 'circle', 'polygon', 'marker'].includes(tagName)) {
+            c.style.stroke = cs.stroke || '#666666';
+            c.style.strokeWidth = cs.strokeWidth || '2px';
+            c.style.fill = cs.fill === 'none' ? 'none' : (cs.fill || '#666666');
+            c.style.opacity = '1';
+            c.style.visibility = 'visible';
+          }
+        }
+      }
+
+      // Buscar y corregir elementos <defs> y <marker> específicamente
+      const defs = clone.querySelectorAll('defs');
+      defs.forEach(def => {
+        def.style.display = 'block';
+        def.style.visibility = 'visible';
+        
+        const markers = def.querySelectorAll('marker');
+        markers.forEach(marker => {
+          marker.style.display = 'block';
+          marker.style.visibility = 'visible';
+          
+          const paths = marker.querySelectorAll('path, polygon');
+          paths.forEach(path => {
+            path.style.fill = '#666666';
+            path.style.stroke = 'none';
+            path.style.opacity = '1';
+            path.style.visibility = 'visible';
+          });
+        });
+      });
+
+      // Buscar elementos de React Flow edges específicamente
+      const edges = clone.querySelectorAll('.react-flow__edge');
+      edges.forEach(edge => {
+        edge.style.opacity = '1';
+        edge.style.visibility = 'visible';
+        
+        const paths = edge.querySelectorAll('path');
+        paths.forEach(path => {
+          path.style.stroke = '#666666';
+          path.style.strokeWidth = '2px';
+          path.style.fill = 'none';
+          path.style.opacity = '1';
+          path.style.visibility = 'visible';
+        });
+      });
+
+      return clone;
+    };
+
+    // crear clone y colocarlo fuera de pantalla para que html2canvas lo pueda procesar
+    const clone = cloneAndInlineStyles(node);
+    
+    // Asegurarnos que el clone tiene el mismo tamaño y fondo visible
+    const origRect = node.getBoundingClientRect();
+    clone.style.position = "fixed";
+    clone.style.left = `${origRect.left}px`;
+    clone.style.top = `${origRect.top}px`;
+    clone.style.width = `${origRect.width}px`;
+    clone.style.height = `${origRect.height}px`;
+    clone.style.zIndex = 999999;
+    clone.style.pointerEvents = "none";
+    clone.style.background = window.getComputedStyle(node).background || "#ffffff";
+
+    document.body.appendChild(clone);
+
+    try {
+      const scale = Math.min(2, window.devicePixelRatio || 1);
+      const canvas = await html2canvas(clone, {
+        useCORS: true,
+        scale,
+        logging: false,
+        backgroundColor: "#ffffff",
+        allowTaint: true,
+        foreignObjectRendering: true,
+        // Configuraciones específicas para SVG
+        onclone: (clonedDoc) => {
+          // Asegurar que todos los SVG sean visibles en el documento clonado
+          const svgs = clonedDoc.querySelectorAll('svg');
+          svgs.forEach(svg => {
+            svg.style.overflow = 'visible';
+            svg.style.display = 'block';
+          });
+          
+          const edges = clonedDoc.querySelectorAll('.react-flow__edge path');
+          edges.forEach(path => {
+            path.style.stroke = '#666666';
+            path.style.strokeWidth = '2px';
+            path.style.fill = 'none';
+          });
+        }
+      });
+      
+      const blob = await new Promise((res) => canvas.toBlob(res, "image/png"));
+      if (!blob) {
+        alert("No se pudo generar la imagen");
+        return;
+      }
+      downloadBlob(blob, `playground_screenshot_${Date.now()}.png`);
+    } catch (err) {
+      console.error("Error generando screenshot:", err);
+      alert("Error al generar screenshot (ver consola).");
+    } finally {
+      // limpiar clone
+      document.body.removeChild(clone);
+    }
+  };
   // -----------------------------------------------------------------------
 
   return (

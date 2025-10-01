@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-const API_URL = import.meta.env.VITE_API_URL || "";;
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
 export default function CreateElementModal({
   project_id,
   onClose,
   onSave,
-  initialElement = null, // <-- nuevo
+  initialElement = null,
 }) {
   const [type, setType] = useState("element");
   const [params, setParams] = useState([{ key: "", dtype: "string" }]);
@@ -35,14 +35,11 @@ export default function CreateElementModal({
     const payload = { type, params: paramsDict };
     let res;
     if (initialElement) {
-      res = await fetch(
-        `${API_URL}/elements/${initialElement.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
+      res = await fetch(`${API_URL}/elements/${initialElement.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
     } else {
       res = await fetch(`${API_URL}/processes/${project_id}/elements`, {
         method: "POST",

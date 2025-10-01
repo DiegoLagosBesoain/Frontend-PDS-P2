@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import * as XLSX from "xlsx"; // <-- import directo
 
 import SimulationDashboard from "./SimulationDashboard";
 import TableView from "./TableView";
@@ -312,7 +313,7 @@ export default function GuestSimulationPage() {
   const exportToXLSX = async () => {
     try {
       setExporting(true);
-      const XLSX = (await import("xlsx")).default;
+      // Uso directo de XLSX importado arriba
       const aoa = buildAoa();
       const ws = XLSX.utils.aoa_to_sheet(aoa);
       const colWidths = [
