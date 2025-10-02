@@ -158,6 +158,14 @@ export default function OutputForm({ node, setEditingNode, elements }) {
               );
             })}
           </div>
+
+          {/* Botón para eliminar este sensor */}
+          <button type="button" onClick={() => {
+            setParamsState(prev => ({
+              ...prev,
+              sensors: prev.sensors.filter((_, i) => i !== idx)
+            }));
+          }} style={{ marginTop: 6 }}>❌</button>
         </div>
       ))}
 

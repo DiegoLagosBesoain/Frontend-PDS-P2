@@ -109,10 +109,11 @@ export default function SelectorForm({ node, setEditingNode, elements = [] }) {
       <label style={labelStyle}>
         Estrategia de selección:
         <select
-          value={node.data.estrategia || "prioridad"}
+          value={node.data.estrategia || ""}
           onChange={(e) => updateField("estrategia", e.target.value)}
           style={selectStyle}
         >
+          <option value="">-- Seleccione estrategia --</option>
           <option value="prioridad">Prioridad de entrada</option>
           <option value="orden">Por orden</option>
         </select>

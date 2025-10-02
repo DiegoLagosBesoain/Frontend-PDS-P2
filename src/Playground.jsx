@@ -315,6 +315,7 @@ export default function Playground() {
 
   const saveNodeChanges = async (node) => {
     try {
+      // 1. Guardar cambios del nodo en el backend
       const res = await fetch(`${API_URL}/components/${node.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -326,32 +327,29 @@ export default function Playground() {
 
       const updated = await res.json();
 
-      setNodes((nds) =>
-        nds.map((n) =>
-          n.id === node.id ? { ...n, data: updated.params } : n
-        )
-      );
-
-      setEdges((eds) => {
-        const newEdges = eds.filter(
-          (e) => e.source !== node.id && e.target !== node.id
-        );
-        return newEdges;
-      });
-
+      // 2. Eliminar todas las conexiones del nodo en el backend
       const removedEdges = edges.filter(
-          (e) => e.source === node.id || e.target === node.id
-        );
-      removedEdges.forEach(async (edge) => {
-          try {
-            await fetch(`${API_URL}/connections/${edge.id}`, { method: "DELETE" });
-          } catch (err) {
-            console.error(`Error eliminando conexión ${edge.id}:`, err);
-          }
-        }
+        (e) => e.source === node.id || e.target === node.id
       );
+      
+      if (removedEdges.length > 0) {
+        await Promise.all(
+          removedEdges.map(async (edge) => {
+            try {
+              await fetch(`${API_URL}/connections/${edge.id}`, { method: "DELETE" });
+            } catch (err) {
+              console.error(`Error eliminando conexión ${edge.id}:`, err);
+            }
+          })
+        );
+      }
+
+      // 3. Cerrar el modal de edición
       setEditingNode(null);
-      fetchData();
+
+      // 4. Recargar la página para asegurar sincronización completa
+      window.location.reload();
+      
     } catch (err) {
       console.error("Error guardando cambios del nodo:", err);
       alert("No se pudieron guardar los cambios del nodo");
