@@ -451,6 +451,22 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
             </>
           )}
 
+          {f.dist_activacion?.tipo === "Fija" && (
+            <label>
+              Valor fijo:
+              <input
+                type="number"
+                value={f.dist_activacion.params?.valor ?? ""}
+                onChange={(e) =>
+                  handleFailureChange(idx, "dist_activacion", {
+                    ...f.dist_activacion,
+                    params: { ...f.dist_activacion.params, valor: e.target.value === "" ? "" : parseFloat(e.target.value) },
+                  })
+                }
+              />
+            </label>
+          )}
+
           {/* Distribución duración */}
           <label>
             Dist Duración:
@@ -514,7 +530,6 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
               </label>
             </>
           )}
-
           {f.dist_duracion?.tipo === "Uniforme" && (
             <>
               <label>
@@ -544,6 +559,22 @@ export default function TransporterForm({ node, setEditingNode, elements }) {
                 />
               </label>
             </>
+          )}
+
+          {f.dist_duracion?.tipo === "Fija" && (
+            <label>
+              Valor fijo:
+              <input
+                type="number"
+                value={f.dist_duracion.params?.valor ?? ""}
+                onChange={(e) =>
+                  handleFailureChange(idx, "dist_duracion", {
+                    ...f.dist_duracion,
+                    params: { ...f.dist_duracion.params, valor: e.target.value === "" ? "" : parseFloat(e.target.value) },
+                  })
+                }
+              />
+            </label>
           )}
 
           <button type="button" onClick={() => {
