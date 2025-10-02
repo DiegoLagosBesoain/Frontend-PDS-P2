@@ -58,12 +58,6 @@ export default function Playground() {
   const [isRunning, setIsRunning] = useState(false);
   const [maxGenerated, setMaxGenerated] = useState(null);
   const [maxOutputs, setMaxOutputs] = useState(null);
-  const edgesRef = useRef(edges);
-
-  // Mantener edgesRef sincronizado con el estado real
-  useEffect(() => {
-    edgesRef.current = edges;
-  }, [edges]);
 
   // ref al contenedor visible que envuelve ReactFlow (para screenshot)
   const flowWrapperRef = useRef(null);
@@ -247,9 +241,54 @@ export default function Playground() {
     fetchData();
   };
 
-  
+  useEffect(() => {
+    setEdges((eds) => {
+      const newEdges = eds.filter((e) => {
+        const node = nodes.find((n) => n.id === e.target || n.id === e.source);
+        if (!node) return false;
 
-  
+        if (e.source === node.id && e.sourceHandle) {
+          const maxSalidas = node.data.salidas || 1;
+          const salidaIndex = parseInt(e.sourceHandle.replace("out-", ""), 10);
+          if (salidaIndex >= maxSalidas) return false;
+        }
+
+        if (e.target === node.id && e.targetHandle) {
+          const maxEntradas = node.data.entradas || 1;
+          const entradaIndex = parseInt(e.targetHandle.replace("in-", ""), 10);
+          if (entradaIndex >= maxEntradas) return false;
+        }
+
+        return true;
+      });
+
+      const removedEdges = eds.filter((e) => !newEdges.includes(e));
+      removedEdges.forEach(async (edge) => {
+        await fetch(`${API_URL}/connections/${edge.id}`, { method: "DELETE" });
+      });
+
+      return newEdges;
+    });
+  }, [nodes]);
+
+  useEffect(() => {
+    setEdges((eds) =>
+      eds.map((e) => {
+        const sourceNode = nodes.find((n) => n.id === e.source);
+        if (!sourceNode) return e;
+
+        if (e.sourceHandle) {
+          const maxSalidas = sourceNode.data.salidas || 1;
+          const salidaIndex = parseInt(e.sourceHandle.replace("out-", ""), 10);
+
+          if (salidaIndex >= maxSalidas) {
+            return { ...e, sourceHandle: "out-0" };
+          }
+        }
+        return e;
+      })
+    );
+  }, [nodes, setEdges]);
 
   // eliminar nodos en backend
   const onNodesDelete = useCallback((deleted) => {
@@ -275,34 +314,7 @@ export default function Playground() {
   }, []);
 
   const saveNodeChanges = async (node) => {
-    // 1) calcular las edges que deben ser removidas usando el ref (siempre actualizado)
-    const removedEdges = edgesRef.current.filter(
-      (e) => e.source === node.id || e.target === node.id
-    );
-
-    // 2) borrar conexiones en backend primero (asegura consistencia)
     try {
-      if (removedEdges.length > 0) {
-        await Promise.all(
-          removedEdges.map((edge) =>
-            fetch(`${API_URL}/connections/${edge.id}`, { method: "DELETE" })
-              .then((r) => {
-                if (!r.ok) {
-                  // no abortamos todo por un error puntual, pero logueamos
-                  console.warn(`No se pudo borrar conexión ${edge.id}`, r.status);
-                }
-              })
-              .catch((err) => {
-                console.error(`Error eliminando conexión ${edge.id}:`, err);
-              })
-          )
-        );
-      }
-
-      // 3) actualizar estado local de edges de forma funcional (inmediato en UI)
-      setEdges((prev) => prev.filter((e) => e.source !== node.id && e.target !== node.id));
-
-      // 4) actualizar el nodo en backend
       const res = await fetch(`${API_URL}/components/${node.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -312,26 +324,37 @@ export default function Playground() {
         }),
       });
 
-      if (!res.ok) {
-        const txt = await res.text().catch(() => null);
-        throw new Error(`Error actualizando componente: ${res.status} ${txt || ""}`);
-      }
-
       const updated = await res.json();
 
-      // 5) refrescar nodes en estado local con los nuevos params
       setNodes((nds) =>
-        nds.map((n) => (n.id === node.id ? { ...n, data: updated.params } : n))
+        nds.map((n) =>
+          n.id === node.id ? { ...n, data: updated.params } : n
+        )
       );
 
-      // 6) cerrar editor y opcional: refrescar desde backend si quieres total sync
+      setEdges((eds) => {
+        const newEdges = eds.filter(
+          (e) => e.source !== node.id && e.target !== node.id
+        );
+        return newEdges;
+      });
+
+      const removedEdges = edges.filter(
+          (e) => e.source === node.id || e.target === node.id
+        );
+      removedEdges.forEach(async (edge) => {
+          try {
+            await fetch(`${API_URL}/connections/${edge.id}`, { method: "DELETE" });
+          } catch (err) {
+            console.error(`Error eliminando conexión ${edge.id}:`, err);
+          }
+        }
+      );
       setEditingNode(null);
-      // opcional: fetchData(); // descomenta si prefieres forzar sincronía total desde backend
+      fetchData();
     } catch (err) {
       console.error("Error guardando cambios del nodo:", err);
       alert("No se pudieron guardar los cambios del nodo");
-      // Si falló algo crítico, podrías re-sincronizar el estado:
-      // fetchData();
     }
   };
 
