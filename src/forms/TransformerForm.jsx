@@ -5,13 +5,15 @@ const DistributionEditor = ({ value, onChange }) => {
   const DIST_TYPES = ["Exponencial", "Uniforme", "Normal", "Fija"];
   
   const makeDefaultForType = (type) => {
+    // cuando type es vacío, devolver tipo vacío para que el dropdown muestre la opción placeholder
+    if (!type) return { type: "", params: {} };
     if (type === "Exponencial") return { type, params: { lambda: 1 } };
     if (type === "Uniforme") return { type, params: { min: 0, max: 1 } };
     if (type === "Normal") return { type, params: { mu: 0, sigma: 1 } };
     return { type: "Fija", params: { value: "" } };
   };
 
-  const { type: dType = "Fija", params: dParams = {} } = value || {};
+  const { type: dType = "", params: dParams = {} } = value || {};
   const setType = (t) => onChange(makeDefaultForType(t));
   const setParam = (key, v) => onChange({ ...value, params: { ...dParams, [key]: v } });
 
@@ -20,6 +22,7 @@ const DistributionEditor = ({ value, onChange }) => {
       <label>
         Tipo de distribución:
         <select value={dType} onChange={(e) => setType(e.target.value)} style={{ marginLeft: 8 }}>
+          <option value="">-- Seleccionar distribución --</option>
           {DIST_TYPES.map((t) => (
             <option key={t} value={t}>
               {t}
@@ -148,11 +151,11 @@ export default function TransformerForm({ node, setEditingNode, elements = [] })
     const distAct =
       f && f.dist_activacion && typeof f.dist_activacion === "object"
         ? f.dist_activacion
-        : makeDefaultForType("Fija");
+        : { type: "", params: {} };
     const distDur =
       f && f.dist_duracion && typeof f.dist_duracion === "object"
         ? f.dist_duracion
-        : makeDefaultForType("Fija");
+        : { type: "", params: {} };
     return { ...f, dist_activacion: distAct, dist_duracion: distDur };
   });
 
@@ -182,7 +185,7 @@ const [paramsState, setParamsState] = useState({
   })),
   failures: normalizedFailures,
   distribution: {
-    default: params.distribution?.default || makeDefaultForType("Fija"),
+    default: params.distribution?.default || { type: "", params: {} },
     conditions: Array.isArray(params.distribution?.conditions)
       ? params.distribution.conditions
       : [],
@@ -280,7 +283,7 @@ const [paramsState, setParamsState] = useState({
       ...prev,
       failures: [
         ...prev.failures,
-        { dist_activacion: makeDefaultForType("Fija"), dist_duracion: makeDefaultForType("Fija") },
+        { dist_activacion: { type: "", params: {} }, dist_duracion: { type: "", params: {} } },
       ],
     }));
 
@@ -423,10 +426,7 @@ const addCondition = () => {
         <input style={inputStyle} value={label} onChange={(e) => setEditingNode({ ...node, data: { ...data, label: e.target.value } })} />
       </label>
 
-      <label style={labelStyle}>
-        Tipo:
-        <input style={inputStyle} value={tipo} onChange={(e) => setEditingNode({ ...node, data: { ...data, tipo: e.target.value } })} />
-      </label>
+      {/* Campo "Tipo" eliminado */}
 
       <label style={labelStyle}>
         Distribución general (default):

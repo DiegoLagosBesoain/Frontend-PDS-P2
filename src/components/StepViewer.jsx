@@ -131,6 +131,15 @@ export default function StepViewer({
     return msgs;
   }, [stepsArray, currentIndex, lastVisibleIndexByTime, mode]);
 
+  // Helper para limpiar nombres de elementos generados (ej: botella-3-<uuid> -> botella-3)
+  const cleanElementNames = (text) => {
+    if (typeof text !== "string") return text;
+    return text.replace(
+      /(\b[\w-]+?)-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi,
+      "$1"
+    );
+  };
+
   // notificar padre (onTimeChange) -> enviamos array de strings con prefijo [time]
   const lastNotifiedRef = useRef({ len: 0, lastText: null });
   useEffect(() => {
@@ -140,10 +149,13 @@ export default function StepViewer({
     lastNotifiedRef.current = { len: visibleMessages.length, lastText };
     const timeToSend = mode === "time" ? currentTime : (stepsArray[currentIndex]?.knum ?? null);
     try {
-      const arr = visibleMessages.map((m) => `[${m.time} ${timeUnit}] ${m.text}`);
+      const arr = visibleMessages.map((m) => {
+        const cleaned = cleanElementNames(m.text);
+        return `[${m.time} ${timeUnit}] ${cleaned}`;
+      });
       onTimeChange(timeToSend, arr);
     } catch (e) { /* ignore */ }
-  }, [visibleMessages, onTimeChange, mode, currentTime, currentIndex, stepsArray]);
+  }, [visibleMessages, onTimeChange, mode, currentTime, currentIndex, stepsArray, timeUnit]);
 
   // auto-scroll al final cuando cambian mensajes
   useEffect(() => {
@@ -223,8 +235,9 @@ export default function StepViewer({
 
   // renderizar mensaje con reemplazo de node ids por labels si se pasa la función
   const renderMessage = (txt) => {
-    if (typeof getLabelForNodeId !== "function") return <span>{txt}</span>;
-    return txt.split(/(\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b)/i).map((part, i) => {
+    const cleaned = cleanElementNames(String(txt));
+    if (typeof getLabelForNodeId !== "function") return <span>{cleaned}</span>;
+    return cleaned.split(/(\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b)/i).map((part, i) => {
       if (i % 2 === 1) {
         const label = getLabelForNodeId(part);
         return <strong key={i} style={{ color: "#1a73e8" }}>{label || part}</strong>;

@@ -93,7 +93,7 @@ function validateNodesHaveElements(nodes = [], elements = [], allowedWithoutElem
       errors.push({
         nodeId: n.id,
         type: n.type,
-        message: `Nodo ${n.id} (tipo=${n.type}) no tiene asignado ningún elemento (buscar en node.params.elemento).`,
+        message: `Nodo ${n.id} (tipo=${n.type}) no tiene asignado ningún elemento debe tener uno par ejecutar la simulacion.`,
       });
     }
   });
@@ -102,6 +102,32 @@ function validateNodesHaveElements(nodes = [], elements = [], allowedWithoutElem
 }
 
 function validateNodeElementsExist(nodes = [], elements = []) {
+  const elemsSet = buildElementsIdSet(elements);
+  const errors = [];
+
+  nodes.forEach((n) => {
+    // Si es transformer lo omitimos (no validamos existencia de elementos)
+    if (String(n.type).toLowerCase() === "transformer") return;
+
+    // extraemos referencias sin filtrar para detectar las que NO existen
+    const refsRaw = extractReferencedElementIds(n, null);
+    const missing = refsRaw.filter((r) => !elemsSet.has(String(r)));
+
+    if (!elemsSet.has(n.params.elemento)) {
+      errors.push({
+        nodeId: n.id,
+        type: n.type,
+        message: `Nodo ${n.id} (tipo=${n.type}) referencia elemento(s) no existentes: ${n.params.elemento}`,
+        missing,
+      });
+    }
+  });
+
+  return { valid: errors.length === 0, errors };
+}
+function validateNodeEditedElement(nodes = [], elements = []) {
+  console.log(nodes)
+  console.log(elements)
   const elemsSet = buildElementsIdSet(elements);
   const errors = [];
 

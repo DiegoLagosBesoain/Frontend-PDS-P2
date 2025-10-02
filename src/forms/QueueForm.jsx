@@ -154,10 +154,11 @@ export default function QueueForm({ node, setEditingNode, elements }) {
       <label style={labelStyle}>
         Estrategia:
         <select
-          value={node.data.estrategia || "FIFO"}
+          value={node.data.estrategia ?? ""}
           onChange={(e) => updateField("estrategia", e.target.value)}
           style={selectStyle}
         >
+          <option value="">-- Seleccione la estrategia --</option>
           <option value="FIFO">FIFO</option>
           <option value="LIFO">LIFO</option>
           <option value="PRIORIDAD">Prioridad</option>
