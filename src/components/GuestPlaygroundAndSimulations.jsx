@@ -313,7 +313,9 @@ export default function GuestSimulationPage() {
   const exportToXLSX = async () => {
     try {
       setExporting(true);
-      // Uso directo de XLSX importado arriba
+      const wb = XLSX.utils.book_new();
+      
+      // Hoja 1: Datos de simulación (tabla principal)
       const aoa = buildAoa();
       const ws = XLSX.utils.aoa_to_sheet(aoa);
       const colWidths = [
@@ -323,8 +325,95 @@ export default function GuestSimulationPage() {
         { wch: 14 },
       ];
       ws["!cols"] = colWidths;
-      const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Simulación");
+
+      // Hoja 2: Datos de sensores
+      const nodeStats = simulation?.results?.nodeStats || [];
+      if (nodeStats.length > 0) {
+        const sensorsAoa = [];
+        sensorsAoa.push(["Nodo ID", "Componente", "Sensor #", "Tipo Sensor", "Tiempo (" + timeUnit + ")", "Valor"]);
+        
+        nodeStats.forEach(node => {
+          const nodeId = node.nodeId || node.id || "unknown";
+          const comp = components.find(c => String(c.id) === String(nodeId));
+          const compLabel = comp ? (comp.params?.label || comp.label || `${comp.type} ${String(comp.id).slice(0,8)}`) : nodeId;
+          const sensors = Array.isArray(node.sensors) ? node.sensors : [];
+          
+          sensors.forEach((sensor, sensorIdx) => {
+            const sensorType = sensor.type || "unknown";
+            const series = Array.isArray(sensor?.series) ? sensor.series : sensor.values ? sensor.values : [];
+            
+            if (series.length === 0) {
+              sensorsAoa.push([nodeId, compLabel, sensorIdx + 1, sensorType, "-", "-"]);
+            } else {
+              series.forEach(pt => {
+                const time = pt?.t ?? pt?.time ?? pt?.timestamp ?? pt?.ts ?? "-";
+                const value = pt?.value ?? pt?.v ?? pt?.val ?? "-";
+                sensorsAoa.push([nodeId, compLabel, sensorIdx + 1, sensorType, time, value]);
+              });
+            }
+          });
+        });
+
+        const wsS = XLSX.utils.aoa_to_sheet(sensorsAoa);
+        wsS["!cols"] = [
+          { wch: 20 }, // Nodo ID
+          { wch: 25 }, // Componente  
+          { wch: 12 }, // Sensor #
+          { wch: 15 }, // Tipo Sensor
+          { wch: 15 }, // Tiempo
+          { wch: 15 }  // Valor
+        ];
+        XLSX.utils.book_append_sheet(wb, wsS, "Sensores");
+      }
+
+      // Hoja 3: Simulación por pasos
+      const stepsObj = simulation?.results?.steps || {};
+      if (Object.keys(stepsObj).length > 0) {
+        const stepsAoa = [];
+        stepsAoa.push(["Tiempo (" + timeUnit + ")", "Evento/Mensaje"]);
+        
+        // Convertir steps object a array ordenado
+        const stepsEntries = Object.entries(stepsObj).map(([k, v]) => {
+          const knum = Number.parseFloat(String(k).replace(",", "."));
+          const isNum = Number.isFinite(knum);
+          const messages = Array.isArray(v) ? v.slice() : [];
+          return { key: k, knum: isNum ? knum : NaN, isNum, messages };
+        });
+
+        // Ordenar por tiempo numérico
+        stepsEntries.sort((a, b) => {
+          if (a.isNum && b.isNum) return a.knum - b.knum;
+          if (a.isNum && !b.isNum) return -1;
+          if (!a.isNum && b.isNum) return 1;
+          return a.key.localeCompare(b.key);
+        });
+
+        // Agregar mensajes a la tabla
+        stepsEntries.forEach(step => {
+          const timeLabel = step.isNum ? step.knum : step.key;
+          if (step.messages.length === 0) {
+            stepsAoa.push([timeLabel, "Sin eventos"]);
+          } else {
+            step.messages.forEach(msg => {
+              // Limpiar UUIDs de los nombres de elementos
+              const cleanMsg = String(msg).replace(
+                /(\b[\w-]+?)-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi,
+                "$1"
+              );
+              stepsAoa.push([timeLabel, cleanMsg]);
+            });
+          }
+        });
+
+        const wsSt = XLSX.utils.aoa_to_sheet(stepsAoa);
+        wsSt["!cols"] = [
+          { wch: 15 }, // Tiempo
+          { wch: 60 }  // Evento/Mensaje
+        ];
+        XLSX.utils.book_append_sheet(wb, wsSt, "Pasos");
+      }
+
       const filename = `simulation_${SimId || "unknown"}_${pid || "proc"}.xlsx`;
       XLSX.writeFile(wb, filename);
     } catch (err) {
